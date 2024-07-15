@@ -31,6 +31,7 @@ import net.minecraftforge.registries.RegistryObject;
 import net.reaper.vanimals.core.init.ModCreativeModTabs;
 import net.reaper.vanimals.core.init.ModEntities;
 import net.reaper.vanimals.core.init.ModItems;
+import net.reaper.vanimals.core.init.ModSounds;
 import org.slf4j.Logger;
 
 import java.util.List;
@@ -54,6 +55,8 @@ public class Vanimals {
         ModItems.register(modEventBus);
 
         ModEntities.register(modEventBus);
+
+        ModSounds.register(modEventBus);
 
         modEventBus.addListener(this::addCreative);
     }

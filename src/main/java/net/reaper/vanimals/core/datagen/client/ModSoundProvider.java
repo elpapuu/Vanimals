@@ -7,7 +7,6 @@ import net.minecraftforge.common.data.SoundDefinition;
 import net.minecraftforge.common.data.SoundDefinitionsProvider;
 import net.reaper.vanimals.Vanimals;
 import net.reaper.vanimals.core.init.ModSounds;
-import org.jetbrains.annotations.NotNull;
 
 public class ModSoundProvider extends SoundDefinitionsProvider {
     /**
@@ -30,7 +29,7 @@ public class ModSoundProvider extends SoundDefinitionsProvider {
         simple(ModSounds.BISON_DEATH2.get());
     }
 
-    public void simple(@NotNull SoundEvent event){
+    public void simple(SoundEvent event){
         add(event, simpleDefinition(event));
     }
 
