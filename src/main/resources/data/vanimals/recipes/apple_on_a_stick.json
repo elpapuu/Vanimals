@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "  a",
+    " ab",
+    "a c"
+  ],
+  "key": {
+    "a": {
+      "item": "minecraft:stick"
+    },
+    "b": {
+      "item": "minecraft:string"
+    },
+    "c": {
+      "item": "minecraft:apple"
+    }
+  },
+  "result": {
+    "item": "vanimals:apple_on_a_stick"
+  }
+}

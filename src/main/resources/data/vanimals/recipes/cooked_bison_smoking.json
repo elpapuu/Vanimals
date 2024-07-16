@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smoking",
+  "ingredient": {
+    "item": "vanimals:raw_bison"
+  },
+  "result": "vanimals:cooked_bison",
+  "experience": 0.15,
+  "cookingtime": 200
+}

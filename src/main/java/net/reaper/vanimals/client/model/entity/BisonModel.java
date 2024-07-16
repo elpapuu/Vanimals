@@ -19,9 +19,10 @@ import net.reaper.vanimals.client.animations.entity.BisonAnimations;
 import net.reaper.vanimals.common.entity.ground.BisonEntity;
 
 public class BisonModel extends HierarchicalModel<BisonEntity> {
-	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
 	public static final ModelLayerLocation BISON_LAYER = new ModelLayerLocation(new ResourceLocation(
 			Vanimals.MODID, "bison"), "main");
+	public static final ModelLayerLocation BISON_SADDLED_LAYER = new ModelLayerLocation(new ResourceLocation(
+			Vanimals.MODID, "bison_saddled"), "second");
 	private final ModelPart bison;
 	public ModelPart body;
 	public ModelPart beard;
@@ -108,8 +109,11 @@ public class BisonModel extends HierarchicalModel<BisonEntity> {
 		this.bison.getAllParts().forEach(ModelPart::resetPose);
 		applyHeadRotation(entity, netHeadYaw, headPitch, ageInTicks);
 
+
 		this.animateWalk(BisonAnimations.WALK, limbSwing, limbSwingAmount, 4f, 4.5f);
 		animate(entity.idleAnimationState, BisonAnimations.IDLE, ageInTicks);
+		animate(entity.stunnedAnimationState, BisonAnimations.STUNNED, ageInTicks);
+		animate(entity.attackAnimationState, BisonAnimations.ATTACK, ageInTicks);
 	}
 
 	private void applyHeadRotation(BisonEntity pEntity, float pNetHeadYaw, float pHeadPitch, float ageInTicks) {

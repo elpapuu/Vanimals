@@ -2,6 +2,8 @@
   "item.vanimals.bison_fur": "Bison Fur",
   "item.vanimals.raw_bison": "Raw Bison",
   "item.vanimals.cooked_bison": "Cooked Bison",
+  "item.vanimals.bison_spawn_egg": "Bison Spawn egg",
+  "item.vanimals.apple_on_a_stick": "Apple on a stick",
 
-  "creativetab.vanimals_tab": "Vanimals"
+  "creativetab.Vanimals": "Vanimals"
 }

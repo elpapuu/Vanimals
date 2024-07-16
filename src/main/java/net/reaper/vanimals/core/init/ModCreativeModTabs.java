@@ -16,9 +16,10 @@ public class ModCreativeModTabs {
 
     public static final RegistryObject<CreativeModeTab> VANIMALS_TAB = CREATIVE_MODE_TABS.register("vanimals_tab",
             () -> CreativeModeTab.builder().icon(() -> new ItemStack(ModItems.BISON_FUR.get()))
-                    .title(Component.translatable(createTranslationKey("vanimals_tab")))
+                    .title(Component.translatable(createTranslationKey("Vanimals")))
                     .displayItems((itemDisplayParameters, pOutput) -> {
                         pOutput.accept(ModItems.BISON_FUR.get());
+                        pOutput.accept(ModItems.APPLE_ON_A_STICK.get());
                         pOutput.accept(ModItems.RAW_BISON.get());
                         pOutput.accept(ModItems.COOKED_BISON.get());
                         pOutput.accept(ModItems.BISON_SPAWN_EGG.get());

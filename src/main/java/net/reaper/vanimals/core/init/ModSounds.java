@@ -16,6 +16,11 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> BISON_IDLE2 = registerSoundEvents("bison_idle2");
     public static final RegistryObject<SoundEvent> BISON_HURT = registerSoundEvents("bison_hurt");
     public static final RegistryObject<SoundEvent> BISON_HURT2 = registerSoundEvents("bison_hurt2");
+    public static final RegistryObject<SoundEvent> BISON_ATTACK = registerSoundEvents("bison_attack");
+    public static final RegistryObject<SoundEvent> BISON_ATTACK_2 = registerSoundEvents("bison_attack_2");
+    public static final RegistryObject<SoundEvent> BISON_ATTACK_3 = registerSoundEvents("bison_attack_3");
+    public static final RegistryObject<SoundEvent> BISON_ROAR = registerSoundEvents("bison_roar");
+    public static final RegistryObject<SoundEvent> BISON_ROAR_2 = registerSoundEvents("bison_roar_2");
     public static final RegistryObject<SoundEvent> BISON_DEATH = registerSoundEvents("bison_death");
     public static final RegistryObject<SoundEvent> BISON_DEATH2 = registerSoundEvents("bison_death2");
 

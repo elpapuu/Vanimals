@@ -12,7 +12,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.reaper.vanimals.Vanimals;
 import net.reaper.vanimals.core.init.ModItems;
-import org.jetbrains.annotations.NotNull;
 
 public class ModItemModelsProvider extends ItemModelProvider {
 
@@ -26,9 +25,11 @@ public class ModItemModelsProvider extends ItemModelProvider {
         simple(ModItems.BISON_FUR.get());
         simple(ModItems.RAW_BISON.get());
         simple(ModItems.COOKED_BISON.get());
+
         spawnEgg(ModItems.BISON_SPAWN_EGG.get());
         spawnEgg(ModItems.CREEPERFISH_SPAWN_EGG.get());
 
+        handheldItem(ModItems.APPLE_ON_A_STICK);
     }
 
     private ItemModelBuilder handheldItem(RegistryObject<Item>item) {

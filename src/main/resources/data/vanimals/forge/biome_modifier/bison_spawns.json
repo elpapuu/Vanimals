@@ -1,0 +1,18 @@
+{
+  "type": "forge:add_spawns",
+  "biomes": "minecraft:plains",
+  "spawners": {
+    "type": "vanimals:bison",
+    "weight": 10,
+    "minCount": 1,
+    "maxCount": 3
+      },
+  "type": "forge:add_spawns",
+  "biomes": "minecraft:snowy_plains",
+  "spawners": {
+    "type": "vanimals:bison",
+    "weight": 7,
+    "minCount": 1,
+    "maxCount": 3
+  }
+}

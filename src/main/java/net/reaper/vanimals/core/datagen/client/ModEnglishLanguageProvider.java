@@ -18,6 +18,7 @@ public class ModEnglishLanguageProvider extends LanguageProvider {
         super(output, Vanimals.MODID, "en_us.json");
     }
 
+    
     @Override
     protected void addTranslations() {
         auto(ModItems.BISON_FUR.get());
@@ -25,11 +26,28 @@ public class ModEnglishLanguageProvider extends LanguageProvider {
         auto(ModItems.COOKED_BISON.get());
         auto(ModItems.BISON_SPAWN_EGG.get());
         auto(ModItems.CREEPERFISH_SPAWN_EGG.get());
+        auto(ModItems.APPLE_ON_A_STICK.get());
+
+        //subtitles
+        add(ModSounds.BISON_IDLE.get(), "Bison ambient");
+        add(ModSounds.BISON_IDLE2.get(), "Bison ambient");
+        add(ModSounds.BISON_HURT.get(), "Bison hurt");
+        add(ModSounds.BISON_HURT2.get(), "Bison hurt");
+        add(ModSounds.BISON_ATTACK.get(), "Bison attack");
+        add(ModSounds.BISON_ATTACK_2.get(), "Bison attack");
+        add(ModSounds.BISON_ATTACK_3.get(), "Bison attack");
+        add(ModSounds.BISON_ROAR.get(), "Bison roar");
+        add(ModSounds.BISON_ROAR_2.get(), "Bison roar");
+        add(ModSounds.BISON_DEATH.get(), "Bison dying");
+        add(ModSounds.BISON_DEATH2.get(), "Bison dying");
 
         //creative tab
-        addTab("vanimals_tab", "Vanimals");
+        addTab("Vanimals", "Vanimals");
     }
-
+    public void add(SoundEvent soundEvent, String translation){
+        add(ModSoundProvider.createSubtitle(soundEvent), translation);
+        add("item." + ModSoundProvider.createSubtitle(soundEvent) + ".desc", translation);
+    }
     public void auto(ItemLike item) {
         add(item.asItem(), toTitleCase(ForgeRegistries.ITEMS.getKey(item.asItem()).getPath()));
     }

@@ -25,6 +25,11 @@ public class ModSoundProvider extends SoundDefinitionsProvider {
         simple(ModSounds.BISON_IDLE2.get());
         simple(ModSounds.BISON_HURT.get());
         simple(ModSounds.BISON_HURT2.get());
+        simple(ModSounds.BISON_ATTACK.get());
+        simple(ModSounds.BISON_ATTACK_2.get());
+        simple(ModSounds.BISON_ATTACK_3.get());
+        simple(ModSounds.BISON_ROAR.get());
+        simple(ModSounds.BISON_ROAR_2.get());
         simple(ModSounds.BISON_DEATH.get());
         simple(ModSounds.BISON_DEATH2.get());
     }

@@ -19,6 +19,7 @@ public class ModEventBusClientEvents {
     @SubscribeEvent
     public static void registerLayer(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(BisonModel.BISON_LAYER, BisonModel::createBodyLayer);
+        event.registerLayerDefinition(BisonModel.BISON_SADDLED_LAYER, BisonModel::createBodyLayer);
         event.registerLayerDefinition(CreeperfishModel.CREEPERFISH_LAYER, CreeperfishModel::createBodyLayer);
         event.registerLayerDefinition(GobblerModel.GOBBLER_LAYER, GobblerModel::createBodyLayer);
     }

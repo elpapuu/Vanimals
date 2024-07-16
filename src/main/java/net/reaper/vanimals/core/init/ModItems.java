@@ -15,6 +15,7 @@ public class ModItems {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, Vanimals.MODID);
 
     public static final RegistryObject<Item> BISON_FUR = ITEMS.register("bison_fur", () ->new Item(new Item.Properties()));
+    public static final RegistryObject<Item> APPLE_ON_A_STICK = ITEMS.register("apple_on_a_stick", () ->new Item(new Item.Properties()));
     public static final RegistryObject<Item> RAW_BISON = ITEMS.register("raw_bison", () -> new Item(new Item.Properties().food(ModFoods.RAW_BISON)));
     public static final RegistryObject<Item> COOKED_BISON = ITEMS.register("cooked_bison", () -> new Item(new Item.Properties().food(ModFoods.COOKED_BISON)));
     public static final RegistryObject<ForgeSpawnEggItem> BISON_SPAWN_EGG = ITEMS.register("bison_spawn_egg", () -> new ForgeSpawnEggItem(ModEntities.BISON, 0x523a2e, 0x98793e, new Item.Properties()));
