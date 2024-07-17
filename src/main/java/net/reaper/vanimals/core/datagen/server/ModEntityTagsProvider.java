@@ -23,6 +23,6 @@ public class ModEntityTagsProvider extends EntityTypeTagsProvider {
     @Override
     protected void addTags(HolderLookup.Provider pProvider) {
         tag(ModTags.Entities.FISH).add(EntityType.SALMON, EntityType.PUFFERFISH, EntityType.COD);
-        tag(ModTags.Entities.MOBS).add(BISON.get(), EntityType.AXOLOTL, EntityType.COW, EntityType.BAT, EntityType.BEE);
+        tag(ModTags.Entities.ANIMAL).add(BISON.get(), EntityType.AXOLOTL, EntityType.COW, EntityType.BAT, EntityType.BEE);
     }
 }

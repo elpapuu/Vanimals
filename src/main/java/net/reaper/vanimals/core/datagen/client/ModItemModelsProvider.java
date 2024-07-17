@@ -29,12 +29,17 @@ public class ModItemModelsProvider extends ItemModelProvider {
         spawnEgg(ModItems.BISON_SPAWN_EGG.get());
         spawnEgg(ModItems.CREEPERFISH_SPAWN_EGG.get());
 
-        handheldItem(ModItems.APPLE_ON_A_STICK);
+        handheldRod(ModItems.APPLE_ON_A_STICK);
     }
 
     private ItemModelBuilder handheldItem(RegistryObject<Item>item) {
         return withExistingParent(item.getId().getPath(),
                 new ResourceLocation("item/handheld")).texture("layer0",
+                new ResourceLocation(Vanimals.MODID,"item/" + item.getId().getPath()));
+    }
+    private ItemModelBuilder handheldRod(RegistryObject<Item>item) {
+        return withExistingParent(item.getId().getPath(),
+                new ResourceLocation("item/handheld_rod")).texture("layer0",
                 new ResourceLocation(Vanimals.MODID,"item/" + item.getId().getPath()));
     }
 

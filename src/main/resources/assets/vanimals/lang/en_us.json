@@ -5,5 +5,7 @@
   "item.vanimals.bison_spawn_egg": "Bison Spawn egg",
   "item.vanimals.apple_on_a_stick": "Apple on a stick",
 
-  "creativetab.Vanimals": "Vanimals"
+  "entity.vanimals.bison": "Bison",
+
+  "creativetab.vanimals.Vanimals": "Vanimals"
 }

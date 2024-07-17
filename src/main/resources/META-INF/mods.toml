@@ -21,17 +21,13 @@ modId="vanimals" #mandatory
 # The version number of the mod
 version="0.1-1.20.1" #mandatory
 # A display name for the mod
-displayName="Vanimals" #mandatory
+displayName="§6§l Vanimals" #mandatory
 # A URL to query for updates for this mod. See the JSON update specification https://docs.minecraftforge.net/en/latest/misc/updatechecker/
 #updateJSONURL="https://change.me.example.invalid/updates.json" #optional
 # A URL for the "homepage" for this mod, displayed in the mod UI
 #displayURL="https://change.me.to.your.mods.homepage.example.invalid/" #optional
-# A file name (in the root of the mod JAR) containing a logo for display
-#logoFile="vanimals.png" #optional
-# A text field displayed in the mod UI
-#credits="Thanks for this example mod goes to Java" #optional
-# A text field displayed in the mod UI
-authors="Reaper" #optional
+credits="-Main Artist and Developer : Reaper || Artist:Jurnaro (Bison)"
+authors="Reaper"
 # Display Test controls the display for your mod in the server connection screen
 # MATCH_VERSION means that your mod will cause a red X if the versions on client and server differ. This is the default behaviour and should be what you choose if you have server and client elements to your mod.
 # IGNORE_SERVER_VERSION means that your mod will not cause a red X if it's present on the server but not on the client. This is what you should use if you're a server only mod.
@@ -40,6 +36,4 @@ authors="Reaper" #optional
 # IMPORTANT NOTE: this is NOT an instruction as to which environments (CLIENT or DEDICATED SERVER) your mod loads on. Your mod should load (and maybe do nothing!) whereever it finds itself.
 #displayTest="MATCH_VERSION" # MATCH_VERSION is the default if nothing is specified (#optional)
 
-# The description text for the mod (multi line!) (#mandatory)
-description='''Vanimals adds more vanilla-friendly mobs to Minecraft!'''
-# A dependency - use the . to indicate dependency for a specific modid. Dependencies are optional.
+description='''§6§lVanimals §radds more §6vanilla-friendly §0§rmobs to §lMinecraft!'''

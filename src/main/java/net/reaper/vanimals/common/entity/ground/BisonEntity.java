@@ -12,7 +12,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -36,18 +35,14 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LeavesBlock;
-import net.minecraft.world.level.block.CropBlock;
-import net.minecraft.world.level.block.BambooStalkBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.registries.RegistryObject;
 import net.reaper.vanimals.core.init.ModEntities;
 import net.reaper.vanimals.core.init.ModItems;
 import net.reaper.vanimals.core.init.ModSounds;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
@@ -168,14 +163,14 @@ public class BisonEntity extends Animal implements ItemSteerable, Saddleable {
 
     public static AttributeSupplier.Builder createAttributes() {
         return Animal.createLivingAttributes()
-                .add(Attributes.MAX_HEALTH, 20D)
+                .add(Attributes.MAX_HEALTH, 45D)
                 .add(Attributes.FOLLOW_RANGE, 24D)
                 .add(Attributes.ATTACK_SPEED, 0.1D)
-                .add(Attributes.MOVEMENT_SPEED, 0.03D)
+                .add(Attributes.MOVEMENT_SPEED, 0.1D)
                 .add(Attributes.ARMOR_TOUGHNESS, 0.1f)
                 .add(Attributes.ATTACK_KNOCKBACK, 0.5f)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D)
-                .add(Attributes.ATTACK_DAMAGE, 2f);
+                .add(Attributes.ATTACK_DAMAGE, 3f);
     }
     protected void updateControlFlags() {
         boolean flag = !(this.getControllingPassenger() instanceof Player);
@@ -225,7 +220,10 @@ public class BisonEntity extends Animal implements ItemSteerable, Saddleable {
             if (!interactionresult.consumesAction()) {
                 ItemStack itemstack = p_28298_.getItemInHand(p_28299_);
                 return itemstack.is(Items.SADDLE) ? itemstack.interactLivingEntity(p_28298_, this, p_28299_) : InteractionResult.PASS;
-            } else {
+            }
+
+
+            else {
                 return interactionresult;
             }
         }
@@ -397,9 +395,15 @@ public class BisonEntity extends Animal implements ItemSteerable, Saddleable {
                 if (this.isImmobile()) {
                     this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.0);
                 } else {
-                    double d0 = this.getTarget() != null ? 0.35 : 0.3;
-                    double d1 = this.getAttribute(Attributes.MOVEMENT_SPEED).getBaseValue();
-                    this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(Mth.lerp(0.03, d1, d0));
+                    this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.1);
+                } if (this.isAggressive()) {
+                    this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.3);
+                    this.setSprinting(true);
+                } else if (!this.isAggressive()) {
+                    this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.1);
+                    this.setSprinting(false);
+                } else if (this.isImmobile()) {
+                    this.setSprinting(false);
                 }
                 if (this.horizontalCollision && ForgeEventFactory.getMobGriefingEvent(this.level(), this)) {
                     boolean flag = false;
@@ -479,7 +483,7 @@ public class BisonEntity extends Animal implements ItemSteerable, Saddleable {
             this.doEnchantDamageEffects(this, p_28837_);
         }
 
-        this.playSound(SoundEvents.IRON_GOLEM_ATTACK, 1.0F, 1.0F);
+        this.playSound(ModSounds.BISON_ATTACK_2.get(), 1.0F, 1.0F);
         return $$3;
     }
     private void stunEffect() {
@@ -524,7 +528,6 @@ public class BisonEntity extends Animal implements ItemSteerable, Saddleable {
             return (double) (f * 2.0F * f * 2.0F + p_33377_.getBbWidth());
         }
     }
-
     class BisonPanicGoal extends PanicGoal {
         public BisonPanicGoal(double p_203124_) {
             super(BisonEntity.this, p_203124_);

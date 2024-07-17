@@ -109,8 +109,12 @@ public class BisonModel extends HierarchicalModel<BisonEntity> {
 		this.bison.getAllParts().forEach(ModelPart::resetPose);
 		applyHeadRotation(entity, netHeadYaw, headPitch, ageInTicks);
 
+		//SPRINT
+		if (entity.isSprinting())
+			this.animateWalk(BisonAnimations.SPRINT, limbSwing, limbSwingAmount, 3f, 4.5f);
 
-		this.animateWalk(BisonAnimations.WALK, limbSwing, limbSwingAmount, 4f, 4.5f);
+		//WALK NORMAL
+		this.animateWalk(BisonAnimations.WALK, limbSwing, limbSwingAmount, 4f, 5.5f);
 		animate(entity.idleAnimationState, BisonAnimations.IDLE, ageInTicks);
 		animate(entity.stunnedAnimationState, BisonAnimations.STUNNED, ageInTicks);
 		animate(entity.attackAnimationState, BisonAnimations.ATTACK, ageInTicks);

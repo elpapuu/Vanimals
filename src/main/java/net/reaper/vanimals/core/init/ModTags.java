@@ -21,7 +21,7 @@ public class ModTags {
     public static class Entities{
 
         public static final TagKey<EntityType<?>> FISH = bind("fish");
-        public static final TagKey<EntityType<?>> MOBS = bind("mobs");
+        public static final TagKey<EntityType<?>> ANIMAL = bind("animal");
 
         private static TagKey<EntityType<?>> bind(String pName) {
             return TagKey.create(Registries.ENTITY_TYPE, Vanimals.modLoc(pName));
