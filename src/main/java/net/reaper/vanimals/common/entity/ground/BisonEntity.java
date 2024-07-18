@@ -40,13 +40,16 @@ import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ForgeEventFactory;
+import net.reaper.vanimals.common.entity.goals.DisableShieldGoal;
 import net.reaper.vanimals.core.init.ModEntities;
 import net.reaper.vanimals.core.init.ModItems;
 import net.reaper.vanimals.core.init.ModSounds;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
+import java.util.EnumSet;
 import java.util.Iterator;
+import java.util.List;
 
 public class BisonEntity extends Animal implements ItemSteerable, Saddleable {
 
@@ -89,7 +92,7 @@ public class BisonEntity extends Animal implements ItemSteerable, Saddleable {
             this.stunnedAnimationState.animateWhen((this.stunnedTick > 0) && !this.isUnderWater() , this.tickCount);
         }
         if (level().isClientSide()) {
-            this.attackAnimationState.animateWhen((this.attackTick > 0) && !this.isAttacking(), this.tickCount);
+            this.attackAnimationState.animateWhen((this.attackTick > 0) && this.isAttacking(), this.tickCount);
         }
     }
 
@@ -147,7 +150,8 @@ public class BisonEntity extends Animal implements ItemSteerable, Saddleable {
         this.goalSelector.addGoal(1, new BreedGoal(this, 1.15D));
         this.goalSelector.addGoal(1, new BisonPanicGoal(1.5));
         this.goalSelector.addGoal(1, new MeleeAttackGoal(this, 1.0, true));
-        this.goalSelector.addGoal(2, new TemptGoal(this, 1.2D, Ingredient.of(Items.APPLE, Items.WHEAT), false));
+        this.goalSelector.addGoal(1, new DisableShieldGoal(this));
+        this.goalSelector.addGoal(2, new TemptGoal(this, 1.2D, Ingredient.of(Items.APPLE, Items.WHEAT, ModItems.APPLE_ON_A_STICK.get()), false));
         this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
 
         this.targetSelector.addGoal(3, (new HurtByTargetGoal(this)).setAlertOthers());
@@ -402,9 +406,8 @@ public class BisonEntity extends Animal implements ItemSteerable, Saddleable {
                 } else if (!this.isAggressive()) {
                     this.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(0.1);
                     this.setSprinting(false);
-                } else if (this.isImmobile()) {
-                    this.setSprinting(false);
-                }
+
+            }
                 if (this.horizontalCollision && ForgeEventFactory.getMobGriefingEvent(this.level(), this)) {
                     boolean flag = false;
                     AABB aabb = this.getBoundingBox().inflate(0.2);
@@ -510,7 +513,6 @@ public class BisonEntity extends Animal implements ItemSteerable, Saddleable {
         }
 
     }
-
     private void strongKnockback(Entity p_33340_) {
         double d0 = p_33340_.getX() - this.getX();
         double d1 = p_33340_.getZ() - this.getZ();

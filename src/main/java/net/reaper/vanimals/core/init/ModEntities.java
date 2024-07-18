@@ -11,6 +11,7 @@ import net.reaper.vanimals.Vanimals;
 import net.reaper.vanimals.common.entity.ground.BisonEntity;
 import net.reaper.vanimals.common.entity.ground.GobblerEntity;
 import net.reaper.vanimals.common.entity.water.CreeperfishEntity;
+import net.reaper.vanimals.common.entity.water.ShieldosteusEntity;
 
 import java.util.function.Supplier;
 
@@ -24,6 +25,9 @@ public class ModEntities {
     public static final RegistryObject<EntityType<CreeperfishEntity>> CREEPERFISH =
             ENTITY_TYPES.register("creeperfish", () -> EntityType.Builder.of(CreeperfishEntity::new, MobCategory.MONSTER)
                     .sized(1f, 1.6f).build("creeperfish"));
+    public static final RegistryObject<EntityType<ShieldosteusEntity>> SHIELDOSTEUS =
+            ENTITY_TYPES.register("shieldosteus", () -> EntityType.Builder.of(ShieldosteusEntity::new, MobCategory.MONSTER)
+                    .sized(1f, 1.6f).build("shieldosteus"));
     public static final RegistryObject<EntityType<GobblerEntity>> GOBBLER =
             ENTITY_TYPES.register("gobbler", () -> EntityType.Builder.of(GobblerEntity::new, MobCategory.MONSTER)
                     .sized(2.5f, 1.3f).build("gobbler"));

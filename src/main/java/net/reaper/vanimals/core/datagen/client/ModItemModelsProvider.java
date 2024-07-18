@@ -26,6 +26,8 @@ public class ModItemModelsProvider extends ItemModelProvider {
         simple(ModItems.RAW_BISON.get());
         simple(ModItems.COOKED_BISON.get());
 
+        simple(ModItems.SHIELDOSTEUS_BUCKET.get());
+
         spawnEgg(ModItems.BISON_SPAWN_EGG.get());
         spawnEgg(ModItems.CREEPERFISH_SPAWN_EGG.get());
 

@@ -10,6 +10,7 @@ import net.reaper.vanimals.Vanimals;
 import net.reaper.vanimals.common.entity.ground.BisonEntity;
 import net.reaper.vanimals.common.entity.ground.GobblerEntity;
 import net.reaper.vanimals.common.entity.water.CreeperfishEntity;
+import net.reaper.vanimals.common.entity.water.ShieldosteusEntity;
 import net.reaper.vanimals.core.init.ModEntities;
 
 import net.minecraft.world.entity.SpawnPlacements;
@@ -21,6 +22,7 @@ public class ModEventBusEvents {
         event.put(ModEntities.BISON.get(), BisonEntity.createAttributes().build());
         event.put(ModEntities.CREEPERFISH.get(), CreeperfishEntity.createAttributes().build());
         event.put(ModEntities.GOBBLER.get(), GobblerEntity.createAttributes().build());
+        event.put(ModEntities.SHIELDOSTEUS.get(), ShieldosteusEntity.createAttributes().build());
     }
     @SubscribeEvent
     public static void registerSpawnPlacements(SpawnPlacementRegisterEvent event) {

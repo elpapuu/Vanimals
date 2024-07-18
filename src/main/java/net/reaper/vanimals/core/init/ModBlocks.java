@@ -14,7 +14,6 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.reaper.vanimals.Vanimals;
-import net.reaper.vanimals.common.block.RoeBlock;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
