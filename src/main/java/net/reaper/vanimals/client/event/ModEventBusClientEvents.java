@@ -17,7 +17,6 @@ public class ModEventBusClientEvents {
     public static void registerLayer(EntityRenderersEvent.RegisterLayerDefinitions event) {
         event.registerLayerDefinition(BisonModel.BISON_LAYER, BisonModel::createBodyLayer);
         event.registerLayerDefinition(BisonModel.BISON_SADDLED_LAYER, BisonModel::createBodyLayer);
-        event.registerLayerDefinition(CreeperfishModel.CREEPERFISH_LAYER, CreeperfishModel::createBodyLayer);
         event.registerLayerDefinition(GobblerModel.GOBBLER_LAYER, GobblerModel::createBodyLayer);
         event.registerLayerDefinition(ShieldosteusModel.SHIELDOSTEUS_LAYER, ShieldosteusModel::createBodyLayer);
     }
@@ -25,7 +24,6 @@ public class ModEventBusClientEvents {
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.BISON.get(), BisonRenderer::new);
-        event.registerEntityRenderer(ModEntities.CREEPERFISH.get(), CreeperfishRenderer::new);
         event.registerEntityRenderer(ModEntities.GOBBLER.get(), GobblerRenderer::new);
         event.registerEntityRenderer(ModEntities.SHIELDOSTEUS.get(), ShieldosteusRenderer::new);
     }

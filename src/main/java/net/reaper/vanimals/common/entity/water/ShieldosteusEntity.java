@@ -11,6 +11,7 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -18,16 +19,19 @@ import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.control.SmoothSwimmingLookControl;
 import net.minecraft.world.entity.ai.control.SmoothSwimmingMoveControl;
 import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.ai.navigation.WaterBoundPathNavigation;
 import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.ThrownTrident;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.reaper.vanimals.common.entity.ground.BisonEntity;
 import net.reaper.vanimals.core.init.ModItems;
 
 import javax.annotation.Nonnull;
@@ -35,7 +39,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 public class ShieldosteusEntity extends WaterAnimal implements Bucketable {
-    private static final EntityDataAccessor<Boolean> IS_ATTACKING = SynchedEntityData.defineId(BisonEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> IS_ATTACKING = SynchedEntityData.defineId(ShieldosteusEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> FROM_BUCKET = SynchedEntityData.defineId(ShieldosteusEntity.class, EntityDataSerializers.BOOLEAN);
     public final AnimationState flopAnimation = new AnimationState();
     public final AnimationState idleAnimationState = new AnimationState();
@@ -49,6 +53,8 @@ public class ShieldosteusEntity extends WaterAnimal implements Bucketable {
         this.lookControl = new SmoothSwimmingLookControl(this, 10);
     }
 
+
+
     protected float getStandingEyeHeight(Pose pPose, EntityDimensions pSize) {
         return pSize.height * 0.65F;
     }
@@ -58,7 +64,7 @@ public class ShieldosteusEntity extends WaterAnimal implements Bucketable {
                 .add(Attributes.FOLLOW_RANGE, 12.0D)
                 .add(Attributes.MOVEMENT_SPEED,1.0D)
                 .add(Attributes.ATTACK_DAMAGE,0.1D)
-                .add(Attributes.MAX_HEALTH, 3.0);
+                .add(Attributes.MAX_HEALTH, 13.0);
     }
 
     public boolean requiresCustomPersistence() {
@@ -92,7 +98,22 @@ public class ShieldosteusEntity extends WaterAnimal implements Bucketable {
             }
         }
     }
-
+    @Override
+    public boolean hurt(DamageSource source, float amount) {
+        if (source.getDirectEntity() instanceof Projectile && !this.isInvulnerable() && !(source.getDirectEntity() instanceof ThrownTrident)) {
+            return false; // Return false for all projectiles except tridents
+        }
+        if (source.getDirectEntity() instanceof LivingEntity && !(((LivingEntity)source.getDirectEntity()).getMainHandItem().getItem() instanceof AxeItem)) {
+            return false; // Return false for all attacks except for tridents and axes
+        }
+        if (source.getDirectEntity() instanceof Player && !(((Player) source.getDirectEntity()).getMainHandItem().getItem() instanceof SwordItem || ((Player) source.getDirectEntity()).getMainHandItem().getItem() instanceof TridentItem)) {
+            // Make the ShieldosteusEntity aggressive
+            setAggressive(true);
+            // Drop a carrot
+            this.spawnAtLocation(Items.CARROT, 1);
+        }
+        return super.hurt(source, amount);
+    }
     private void setupAnimationStates() {
         if (this.idleAnimationTimeout <= 0) {
             this.idleAnimationTimeout = this.random.nextInt(40) + 80;
@@ -157,8 +178,11 @@ public class ShieldosteusEntity extends WaterAnimal implements Bucketable {
         Predicate var10009 = EntitySelector.NO_SPECTATORS;
         Objects.requireNonNull(var10009);
         this.goalSelector.addGoal(1, new TryFindWaterGoal(this));
+        this.goalSelector.addGoal(1, new MeleeAttackGoal(this, 1.0, true));
+        this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
         this.goalSelector.addGoal(4, new FishSwimGoal(this));
-        this.goalSelector.addGoal(4, new MeleeAttackGoal(this, 1.0, true));
+        this.targetSelector.addGoal(8, new ResetUniversalAngerTargetGoal(this, true));
+        this.goalSelector.addGoal(4, new PushOnHurtGoal(this));
         var10000.addGoal(2, new AvoidEntityGoal(this, Player.class, 8.0F, 1.6, 1.4, var10009::test));
     }
 
@@ -271,6 +295,30 @@ public class ShieldosteusEntity extends WaterAnimal implements Bucketable {
 
             } else {
                 this.fish.setSpeed(0.0F);
+            }
+        }
+    }
+    public class PushOnHurtGoal extends Goal {
+
+        private final ShieldosteusEntity entity;
+
+        public PushOnHurtGoal(ShieldosteusEntity entity) {
+            this.entity = entity;
+        }
+
+        @Override
+        public boolean canUse() {
+            return true; // This goal can always be used
+        }
+
+        @Override
+        public void start() {
+            LivingEntity attacker = this.entity.getLastHurtByMob();
+            if (attacker != null) {
+                double knockbackForce = 0.5; // Adjust the knockback force as needed
+                double deltaX = this.entity.getX() - attacker.getX();
+                double deltaZ = this.entity.getZ() - attacker.getZ();
+                this.entity.knockback(deltaX, deltaZ, knockbackForce);
             }
         }
     }

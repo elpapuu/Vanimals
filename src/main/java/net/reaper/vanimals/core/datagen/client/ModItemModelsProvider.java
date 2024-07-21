@@ -23,13 +23,16 @@ public class ModItemModelsProvider extends ItemModelProvider {
     @Override
     protected void registerModels() {
         simple(ModItems.BISON_FUR.get());
+        simple(ModItems.BISON_HORN.get());
+
         simple(ModItems.RAW_BISON.get());
+
         simple(ModItems.COOKED_BISON.get());
 
         simple(ModItems.SHIELDOSTEUS_BUCKET.get());
 
         spawnEgg(ModItems.BISON_SPAWN_EGG.get());
-        spawnEgg(ModItems.CREEPERFISH_SPAWN_EGG.get());
+        spawnEgg(ModItems.SHIELDOSTEUS_SPAWN_EGG.get());
 
         handheldRod(ModItems.APPLE_ON_A_STICK);
     }

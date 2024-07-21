@@ -1,0 +1,101 @@
+{
+  "bison_attack": {
+    "sounds": [
+      {
+        "name": "vanimals:bison_attack",
+        "stream": true
+      }
+    ],
+    "subtitle": "sound.vanimals.bison_attack"
+  },
+  "bison_attack_2": {
+    "sounds": [
+      {
+        "name": "vanimals:bison_attack_2",
+        "stream": true
+      }
+    ],
+    "subtitle": "sound.vanimals.bison_attack_2"
+  },
+  "bison_attack_3": {
+    "sounds": [
+      {
+        "name": "vanimals:bison_attack_3",
+        "stream": true
+      }
+    ],
+    "subtitle": "sound.vanimals.bison_attack_3"
+  },
+  "bison_death": {
+    "sounds": [
+      {
+        "name": "vanimals:bison_death",
+        "stream": true
+      }
+    ],
+    "subtitle": "sound.vanimals.bison_death"
+  },
+  "bison_death2": {
+    "sounds": [
+      {
+        "name": "vanimals:bison_death2",
+        "stream": true
+      }
+    ],
+    "subtitle": "sound.vanimals.bison_death2"
+  },
+  "bison_hurt": {
+    "sounds": [
+      {
+        "name": "vanimals:bison_hurt",
+        "stream": true
+      }
+    ],
+    "subtitle": "sound.vanimals.bison_hurt"
+  },
+  "bison_hurt2": {
+    "sounds": [
+      {
+        "name": "vanimals:bison_hurt2",
+        "stream": true
+      }
+    ],
+    "subtitle": "sound.vanimals.bison_hurt2"
+  },
+  "bison_idle": {
+    "sounds": [
+      {
+        "name": "vanimals:bison_idle",
+        "stream": true
+      }
+    ],
+    "subtitle": "sound.vanimals.bison_idle"
+  },
+  "bison_idle2": {
+    "sounds": [
+      {
+        "name": "vanimals:bison_idle2",
+        "stream": true
+      }
+    ],
+    "subtitle": "sound.vanimals.bison_idle2"
+  },
+  "bison_roar": {
+    "sounds": [
+      {
+        "name": "vanimals:bison_roar",
+        "stream": true
+      }
+    ],
+    "subtitle": "sound.vanimals.bison_roar"
+  },
+  "bison_roar_2": {
+    "sounds": [
+      {
+        "name": "vanimals:bison_roar_2",
+        "stream": true
+      }
+    ],
+    "subtitle": "sound.vanimals.bison_roar_2"
+  }
+}

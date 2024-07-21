@@ -22,11 +22,14 @@ public class ModEnglishLanguageProvider extends LanguageProvider {
     @Override
     protected void addTranslations() {
         auto(ModItems.BISON_FUR.get());
+        auto(ModItems.BISON_HORN.get());
+
         auto(ModItems.RAW_BISON.get());
         auto(ModItems.COOKED_BISON.get());
+
         auto(ModItems.SHIELDOSTEUS_BUCKET.get());
         auto(ModItems.BISON_SPAWN_EGG.get());
-        auto(ModItems.CREEPERFISH_SPAWN_EGG.get());
+        auto(ModItems.SHIELDOSTEUS_SPAWN_EGG.get());
         auto(ModItems.APPLE_ON_A_STICK.get());
 
         //subtitles

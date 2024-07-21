@@ -82,8 +82,13 @@ public class ShieldosteusModel extends HierarchicalModel<ShieldosteusEntity> {
 		pNetHeadYaw = Mth.clamp(pNetHeadYaw, -30.0F, 30.0F);
 		pHeadPitch = Mth.clamp(pHeadPitch, -25.0F, 45.0F);
 
-		this.shieldosteus.getChild("body").yRot = pNetHeadYaw * 0.017453292F;
-		this.shieldosteus.getChild("body").xRot = pHeadPitch * 0.017453292F;
+		if (pEntity.flopAnimation.isStarted()) {
+			this.shieldosteus.getChild("body").yRot = 0.0F;
+			this.shieldosteus.getChild("body").xRot = 0.017453292F;
+		} else {
+			this.shieldosteus.getChild("body").yRot = pNetHeadYaw * 0.017453292F;
+			this.shieldosteus.getChild("body").xRot = pHeadPitch * 0.017453292F;
+		}
 	}
 	@Override
 	public ModelPart root() {

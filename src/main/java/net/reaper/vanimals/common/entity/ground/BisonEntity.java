@@ -1,6 +1,8 @@
 package net.reaper.vanimals.common.entity.ground;
 
 import com.google.common.collect.UnmodifiableIterator;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -17,6 +19,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -25,26 +28,30 @@ import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ForgeEventFactory;
-import net.reaper.vanimals.common.entity.goals.DisableShieldGoal;
+import net.reaper.vanimals.common.entity.goals.DisablePlayerShieldGoal;
 import net.reaper.vanimals.core.init.ModEntities;
 import net.reaper.vanimals.core.init.ModItems;
 import net.reaper.vanimals.core.init.ModSounds;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 import javax.annotation.Nonnull;
 import java.util.EnumSet;
@@ -76,6 +83,7 @@ public class BisonEntity extends Animal implements ItemSteerable, Saddleable {
     private int stunnedTick;
     private byte p29814;
     private int roarTick;
+    private int shieldDamageCounter = 0;
 
 
     @Override
@@ -130,6 +138,24 @@ public class BisonEntity extends Animal implements ItemSteerable, Saddleable {
             attackAnimationState.stop();
         }
     }
+    @Override
+    public boolean hurt(DamageSource damageSource, float amount) {
+        if (damageSource.getDirectEntity() instanceof Projectile && damageSource.getEntity() instanceof Player) {
+            Player player = (Player) damageSource.getEntity();
+            ItemStack shield = player.getMainHandItem();
+
+            // Check if the target is holding a shield
+            if (shield.getItem() instanceof ShieldItem) {
+                shieldDamageCounter++; // Increase shield damage counter
+                if (shieldDamageCounter >= 2) {
+                    // Shield breaks after 3 attacks
+                    shield.shrink(1); // Break the shield
+                    shieldDamageCounter = 0; // Reset the counter
+                }
+            }
+        }
+        return super.hurt(damageSource, amount);
+    }
 
     @Override
     protected void updateWalkAnimation(float pPartialTick) {
@@ -150,7 +176,7 @@ public class BisonEntity extends Animal implements ItemSteerable, Saddleable {
         this.goalSelector.addGoal(1, new BreedGoal(this, 1.15D));
         this.goalSelector.addGoal(1, new BisonPanicGoal(1.5));
         this.goalSelector.addGoal(1, new MeleeAttackGoal(this, 1.0, true));
-        this.goalSelector.addGoal(1, new DisableShieldGoal(this));
+        this.goalSelector.addGoal(1, new DisablePlayerShieldGoal(this));
         this.goalSelector.addGoal(2, new TemptGoal(this, 1.2D, Ingredient.of(Items.APPLE, Items.WHEAT, ModItems.APPLE_ON_A_STICK.get()), false));
         this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
 
@@ -345,10 +371,6 @@ public class BisonEntity extends Animal implements ItemSteerable, Saddleable {
     protected float getRiddenSpeed(Player p_278258_) {
         return (float)(this.getAttributeValue(Attributes.MOVEMENT_SPEED) * 1 * (double)this.steering.boostFactor());
     }
-
-    public boolean boost() {
-        return this.steering.boost(this.getRandom());
-    }
     protected void positionRider(@Nonnull Entity pPassenger, @Nonnull Entity.MoveFunction pCallback) {
         int i = this.getPassengers().indexOf(pPassenger);
         if (i >= 0) {
@@ -379,6 +401,50 @@ public class BisonEntity extends Animal implements ItemSteerable, Saddleable {
     @Override
     protected SoundEvent getDeathSound() {
         return this.random.nextInt(2) == 0 ? ModSounds.BISON_DEATH.get() : ModSounds.BISON_DEATH2.get();
+    }
+
+    @Override
+    public boolean boost() {
+        if (!(this instanceof LivingEntity)) {
+            return false;
+        }
+
+        Entity entity = this.getPassengers().get(0);
+        if (!(entity instanceof Player player)) {
+            return false;
+        }
+
+        if (!isKeybindControlPressed(player)) {
+            return false;
+        }
+
+        this.setSprinting(true); // Set the entity to sprint when the control key is pressed
+
+        List<Entity> entities = this.level().getEntitiesOfClass(Entity.class, this.getBoundingBox().inflate(2.0D, 0.0D, 2.0D));
+        for (Entity entity1 : entities) {
+            if (entity1 instanceof LivingEntity livingEntity && !(entity1 instanceof BisonEntity)) {
+                livingEntity.hurt(damageSources().playerAttack(player), 1.0F); // Deal 1.0F damage to living entities
+            }
+        }
+
+        return true;
+    }
+
+    private boolean isKeybindControlPressed(Player player) {
+        Minecraft minecraft = Minecraft.getInstance();
+        long windowHandle = minecraft.getWindow().getWindow();
+        boolean isControlPressed = InputConstants.isKeyDown(windowHandle, GLFW.GLFW_KEY_LEFT_CONTROL);
+
+        // Ensure the player's vehicle is the current BisonEntity
+        if (player.getVehicle() instanceof BisonEntity bisonEntity && bisonEntity == this) {
+            if (isControlPressed) {
+                return true; // Control key is pressed
+            } else {
+                return false; // Control key is not pressed
+            }
+        }
+
+        return false; // Player is not riding the correct vehicle
     }
 
     public void handleEntityEvent(byte p_29814_) {
