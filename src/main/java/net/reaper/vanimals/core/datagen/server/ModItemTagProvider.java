@@ -7,7 +7,6 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.fml.common.Mod;
 import net.reaper.vanimals.Vanimals;
 import net.reaper.vanimals.core.init.ModItems;
 import net.reaper.vanimals.core.init.ModTags;

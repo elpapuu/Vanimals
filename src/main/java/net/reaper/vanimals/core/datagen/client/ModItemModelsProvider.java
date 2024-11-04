@@ -29,10 +29,7 @@ public class ModItemModelsProvider extends ItemModelProvider {
 
         simple(ModItems.COOKED_BISON.get());
 
-        simple(ModItems.SHIELDOSTEUS_BUCKET.get());
-
         spawnEgg(ModItems.BISON_SPAWN_EGG.get());
-        spawnEgg(ModItems.SHIELDOSTEUS_SPAWN_EGG.get());
 
         handheldRod(ModItems.APPLE_ON_A_STICK);
     }

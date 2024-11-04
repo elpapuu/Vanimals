@@ -387,7 +387,7 @@ public class BisonEntity extends Animal implements ItemSteerable, Saddleable {
             }
 
             Vec3 vec3 = (new Vec3(0.0D, 0.0D, f)).yRot(-this.yBodyRot * ((float) Math.PI / 180F));
-            pCallback.accept(pPassenger, this.getX() + vec3.x * 1.1F, this.getY() + 1.62F, this.getZ() + vec3.z * 1.1F);
+            pCallback.accept(pPassenger, this.getX() + vec3.x * 1.1F, this.getY() + 1.61F, this.getZ() + vec3.z * 1.1F);
             //this.clampRotation(pPassenger);
         }
     }

@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.reaper.vanimals.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "vanimals.refmap.json",
+  "mixins": [
+  ],
+  "client": [
+    "client.HumanoidModelMixin",
+    "client.LivingEntityRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
