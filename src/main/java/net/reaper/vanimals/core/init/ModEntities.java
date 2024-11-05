@@ -13,17 +13,19 @@ import net.reaper.vanimals.common.entity.ground.BisonEntity;
 import java.util.function.Supplier;
 
 public class ModEntities {
-    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES =
-            DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, Vanimals.MODID);
+    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, Vanimals.MODID);
 
-    public static final RegistryObject<EntityType<BisonEntity>> BISON =
-            ENTITY_TYPES.register("bison", () -> EntityType.Builder.of(BisonEntity::new, MobCategory.CREATURE)
-                    .sized(2f, 3f).build("bison"));
-    public static final <T extends Entity> RegistryObject<EntityType<T>> register(String name, Supplier<EntityType.Builder<T>> builder){
-        return ENTITY_TYPES.register(name, () -> builder.get().build(Vanimals.MODID));
+    public static final RegistryObject<EntityType<BisonEntity>> BISON;
 
+    private static <T extends Entity> RegistryObject<EntityType<T>> registerEntity(String pName, EntityType.Builder<T> pEntityBuilder) {
+        return ENTITY_TYPES.register(pName, () -> pEntityBuilder.build(pName));
     }
+
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);
+    }
+
+    static {
+        BISON = registerEntity("bison", EntityType.Builder.of(BisonEntity::new, MobCategory.CREATURE).sized(1.7F, 3.6F));
     }
 }

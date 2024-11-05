@@ -231,7 +231,8 @@ public class ShieldosteusEntity extends WaterAnimal implements Bucketable {
     @Override
     @Nonnull
     public ItemStack getBucketItemStack() {
-        return new ItemStack(ModItems.SHIELDOSTEUS_BUCKET.get());
+        //new ItemStack(ModItems.SHIELDOSTEUS_BUCKET.get());
+        return new ItemStack(Items.APPLE);
     }
 
     public SoundEvent getPickupSound() {

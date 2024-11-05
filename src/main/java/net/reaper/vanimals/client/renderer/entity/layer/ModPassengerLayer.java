@@ -6,7 +6,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.world.entity.LivingEntity;
-import net.reaper.vanimals.common.entity.utils.ICustomPlayerRidePos;
+import net.reaper.vanimals.client.util.ICustomPlayerRidePos;
 import net.reaper.vanimals.common.util.RenderUtil;
 import org.jetbrains.annotations.NotNull;
 

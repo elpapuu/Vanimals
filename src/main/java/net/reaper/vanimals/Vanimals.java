@@ -19,6 +19,7 @@ import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -28,6 +29,9 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+import net.reaper.vanimals.client.ModClientProxy;
+import net.reaper.vanimals.client.model.ModLayers;
+import net.reaper.vanimals.common.ModCommonProxy;
 import net.reaper.vanimals.core.init.ModCreativeModTabs;
 import net.reaper.vanimals.core.init.ModEntities;
 import net.reaper.vanimals.core.init.ModItems;
@@ -36,29 +40,29 @@ import org.slf4j.Logger;
 
 import java.util.List;
 
-// The value here should match an entry in the META-INF/mods.toml file
 @Mod(Vanimals.MODID)
 public class Vanimals {
-    // Define mod id in a common place for everything to reference
     public static final String MODID = "vanimals";
-    // Directly reference a slf4j logger
     public static final Logger LOGGER = LogUtils.getLogger();
-
+    public static ModCommonProxy PROXY = DistExecutor.safeRunForDist(() -> ModClientProxy::new, () -> ModCommonProxy::new);
 
     public Vanimals() {
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-
+        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+        ModCreativeModTabs.register(bus);
+        ModItems.register(bus);
+        ModEntities.register(bus);
+        ModSounds.register(bus);
+        bus.addListener(this::addCreative);
+        bus.addListener(this::onClientSetup);
+        bus.addListener(ModLayers::onRegisterLayerDefinitions);
+        PROXY.commonInitialize();
+    }
 
-        ModCreativeModTabs.register(modEventBus);
-
-        ModItems.register(modEventBus);
-
-        ModEntities.register(modEventBus);
-
-        ModSounds.register(modEventBus);
-
-        modEventBus.addListener(this::addCreative);
+    private void onClientSetup(FMLClientSetupEvent pEvent) {
+        pEvent.enqueueWork(() -> {
+            PROXY.clientInitialize();
+        });
     }
 
     public static ResourceLocation modLoc(String name){
@@ -70,7 +74,6 @@ public class Vanimals {
     }
 
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
-        // Adds everything to Search Tab, since Doot's too lazy to /give during debug.
         if (event.getTabKey() == CreativeModeTabs.SEARCH) {
             List<Item> items = ModItems.ITEMS.getEntries()
                     .stream()

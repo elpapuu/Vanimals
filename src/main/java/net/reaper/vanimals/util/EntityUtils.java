@@ -1,0 +1,48 @@
+package net.reaper.vanimals.util;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.List;
+
+public class EntityUtils {
+    public static <T extends Entity> @NotNull List<T> getEntitiesAroundPos(Class<T> pEntityClass, @Nullable Entity pSelf, Vec3 pPos, float pRadius, boolean pMustSee) {
+        if (pSelf != null) {
+            AABB aabb = pSelf.getBoundingBox().inflate(pRadius);
+            List<T> entityList = pSelf.level().getEntitiesOfClass(pEntityClass, aabb, EntitySelector.ENTITY_STILL_ALIVE);
+            if (!entityList.isEmpty()) {
+                if (pSelf instanceof LivingEntity living) {
+                    if (pMustSee) {
+                        entityList.removeIf(entity1 -> !living.hasLineOfSight(entity1));
+                    }
+                    return entityList;
+                }
+            }
+        }
+        return Collections.emptyList();
+    }
+
+    public static <T extends Entity> @NotNull List<T> getEntitiesAroundBlock(Class<T> pEntityClass, @Nullable Entity pSelf, Vec3 pPos, float pRadius, boolean pMustSee) {
+        return getEntitiesAroundPos(pEntityClass, pSelf, new BlockPos((int) pPos.x, (int) pPos.y, (int) pPos.z).getCenter(), pRadius, pMustSee);
+    }
+
+    public static boolean isEntityStepping(LivingEntity pEntity, float pAnimationSpeedFactor, float pScale) {
+        float stepOffset = (float) Math.tan(pEntity.walkAnimation.position() * pAnimationSpeedFactor - 0.2F);
+        return stepOffset * stepOffset < pScale * pScale;
+    }
+
+    public static boolean isEntityMoving(@javax.annotation.Nullable Entity pEntity, float pMinChange) {
+        if (pEntity == null) {
+            return false;
+        }
+        Vec3 delta = pEntity.getDeltaMovement();
+        return !(delta.length() > -pMinChange && delta.length() < pMinChange);
+    }
+}
