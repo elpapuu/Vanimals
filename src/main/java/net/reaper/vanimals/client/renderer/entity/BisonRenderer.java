@@ -42,7 +42,7 @@ public class BisonRenderer extends MobRenderer<BisonEntity, BisonModel> implemen
     @Override
     public <T extends Entity> void applyRiderMatrixStack(@NotNull T pVehicle, @NotNull PoseStack pMatrixStack) {
         this.getModel().setMatrixStack(pMatrixStack);
-        pMatrixStack.translate(0.0F, 2.8F - pVehicle.getBbHeight(), -1.0F);
+        pMatrixStack.translate(0.0F, 1.25F - pVehicle.getBbHeight(), -1.0F);
         pMatrixStack.mulPose(Axis.YN.rotationDegrees(180.0F));
         pMatrixStack.mulPose(Axis.XN.rotationDegrees(180.0F));
     }

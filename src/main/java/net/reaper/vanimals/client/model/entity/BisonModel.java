@@ -16,12 +16,14 @@ import org.jetbrains.annotations.NotNull;
 public class BisonModel extends HierarchicalModel<BisonEntity> {
     private final ModelPart root;
     private final ModelPart bison;
-    private final ModelPart body;
+    public final ModelPart body;
+    public final ModelPart front;
 
     public BisonModel(ModelPart pRoot) {
         this.root = pRoot.getChild("root");
         this.bison = this.root.getChild("bison");
         this.body = this.bison.getChild("body");
+        this.front = this.body.getChild("front");
     }
 
     public static LayerDefinition createBodyLayer() {

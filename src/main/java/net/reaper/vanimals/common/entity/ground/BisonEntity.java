@@ -41,11 +41,15 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ForgeEventFactory;
+import net.reaper.vanimals.client.input.InputKey;
+import net.reaper.vanimals.client.input.InputStateManager;
+import net.reaper.vanimals.client.input.KeyPressType;
 import net.reaper.vanimals.client.util.IDynamicCamera;
 import net.reaper.vanimals.client.util.IShakeScreenOnStep;
 import net.reaper.vanimals.common.entity.goals.DisablePlayerShieldGoal;
@@ -53,6 +57,7 @@ import net.reaper.vanimals.core.init.ModEntities;
 import net.reaper.vanimals.core.init.ModItems;
 import net.reaper.vanimals.core.init.ModSounds;
 import net.reaper.vanimals.util.EntityUtils;
+import net.reaper.vanimals.util.TickUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -93,20 +98,13 @@ public class BisonEntity extends Animal implements ItemSteerable, Saddleable, ID
     @Override
     public void tick() {
         super.tick();
-
         if (this.level().isClientSide()) {
-            setupAnimationStates();
-        }
-        if (level().isClientSide()) {
+            this.setupAnimationStates();
             this.idleAnimationState.animateWhen(!isInWaterOrBubble() && !this.walkAnimation.isMoving(), this.tickCount);
-        }
-        if (level().isClientSide()) {
             this.stunnedAnimationState.animateWhen((this.stunnedTick > 0) && !this.isUnderWater() , this.tickCount);
-        }
-        if (level().isClientSide()) {
             this.attackAnimationState.animateWhen((this.attackTick > 0) && this.isAttacking(), this.tickCount);
+            this.handleScreenShake();
         }
-        this.handleScreenShake();
     }
 
     private void setupAnimationStates() {
@@ -142,7 +140,51 @@ public class BisonEntity extends Animal implements ItemSteerable, Saddleable, ID
         if (this.attackTick <= 0 && !this.isAttacking()) {
             attackAnimationState.stop();
         }
+        InputStateManager inputManager = InputStateManager.getInstance();
+        if (this.level().isClientSide()) {
+            if (this.getFirstPassenger() != null) {
+                if (inputManager.isKeyPress(InputKey.CTRL, KeyPressType.HOLD)) {
+                    if (EntityUtils.isEntityMoving(this, 0.08F)) {
+                        BlockPos blockPos = this.getOnPos();
+                        BlockState blockState = this.level().getBlockState(blockPos);
+                        TickUtils.doEvery(this, 4, () -> {
+                            for (float angle : new float[]{-0.3F, 0.3F}) {
+                                if (!blockState.addRunningEffects(this.level(), blockPos, this) && blockState.getRenderShape() != RenderShape.INVISIBLE) {
+                                    Vec3 delta = this.getDeltaMovement();
+                                    Vec3 lookAngle = this.getLookAngle().normalize();
+                                    Vec3 sideOffset = new Vec3(-lookAngle.z, 0, lookAngle.x + 0.6F).normalize().scale(angle);
+                                    double particleX = this.getX() + sideOffset.x;
+                                    double particleZ = this.getZ() + sideOffset.z;
+                                    this.level().addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, particleX, this.getY() + 0.3F, particleZ, delta.x / 2.5F, 0.0F, delta.z / 2.5F);
+                                }
+                            }
+                        });
+                        this.setSprinting(true);
+                    } else {
+                        this.setSprinting(false);
+                    }
+                }
+                if (inputManager.isKeyPress(InputKey.CTRL, KeyPressType.RELEASED)) {
+                    this.setSprinting(false);
+                }
+            }
+        }
     }
+
+    private void attackEntitiesInFront() {
+        Vec3 lookAngle = this.getLookAngle().normalize();
+        float attackRange = 2.5F;
+        Vec3 start = this.position().add(0, this.getBbHeight() / 2, 0);
+        Vec3 end = start.add(lookAngle.x * attackRange, 0, lookAngle.z * attackRange);
+        AABB rayBoundingBox = new AABB(start, end).inflate(0.6);
+        List<LivingEntity> entitiesInRay = this.level().getEntitiesOfClass(LivingEntity.class, rayBoundingBox);
+        for (LivingEntity entity : entitiesInRay) {
+            if (entity != this && entity.isAlive()) {
+                entity.hurt(this.damageSources().mobAttack(this), 4.5F);
+            }
+        }
+    }
+
     @Override
     public boolean hurt(DamageSource damageSource, float amount) {
         if (damageSource.getDirectEntity() instanceof Projectile && damageSource.getEntity() instanceof Player) {
@@ -366,7 +408,7 @@ public class BisonEntity extends Animal implements ItemSteerable, Saddleable, ID
     }
 
     protected Vec3 getRiddenInput(Player p_278309_, Vec3 p_275479_) {
-        return new Vec3(0.0, 0.0, 0.6);
+        return new Vec3(0.0, 0.0, this.isSprinting() ? 0.8F : 0.4F);
     }
 
     protected float getRiddenSpeed(Player p_278258_) {
@@ -375,7 +417,7 @@ public class BisonEntity extends Animal implements ItemSteerable, Saddleable, ID
 
     @Override
     public double getPassengersRidingOffset() {
-        return super.getPassengersRidingOffset() - 0.75F;
+        return super.getPassengersRidingOffset() + 0.3F;
     }
 
     @Override
@@ -582,6 +624,13 @@ public class BisonEntity extends Animal implements ItemSteerable, Saddleable, ID
         p_33340_.push(d0 / d2 * 4.0, 0.2, d1 / d2 * 4.0);
     }
 
+    public void onServerInput(InputKey pInputKey, KeyPressType pKeyPressType) {
+        if (pKeyPressType == KeyPressType.HOLD && pInputKey == InputKey.CTRL) {
+            TickUtils.doEvery(this, 5, this::attackEntitiesInFront);
+        }
+    }
+
+
     @Override
     public float getMaxCameraTilt() {
         return 10.0F;
@@ -594,7 +643,7 @@ public class BisonEntity extends Animal implements ItemSteerable, Saddleable, ID
 
     @Override
     public boolean canEntityShake(@NotNull LivingEntity pEntity) {
-        return IShakeScreenOnStep.super.canEntityShake(pEntity) && EntityUtils.isEntityMoving(this, 0.1F);
+        return IShakeScreenOnStep.super.canEntityShake(pEntity) && EntityUtils.isEntityMoving(this, 0.08F);
     }
 
     @Override

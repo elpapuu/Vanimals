@@ -32,6 +32,8 @@ import net.minecraftforge.registries.RegistryObject;
 import net.reaper.vanimals.client.ModClientProxy;
 import net.reaper.vanimals.client.model.ModLayers;
 import net.reaper.vanimals.common.ModCommonProxy;
+import net.reaper.vanimals.common.network.NetworkHandler;
+import net.reaper.vanimals.common.network.packet_builder.PacketProcessor;
 import net.reaper.vanimals.core.init.ModCreativeModTabs;
 import net.reaper.vanimals.core.init.ModEntities;
 import net.reaper.vanimals.core.init.ModItems;
@@ -54,9 +56,15 @@ public class Vanimals {
         ModEntities.register(bus);
         ModSounds.register(bus);
         bus.addListener(this::addCreative);
+        bus.addListener(this::onCommonSetup);
         bus.addListener(this::onClientSetup);
         bus.addListener(ModLayers::onRegisterLayerDefinitions);
         PROXY.commonInitialize();
+        PacketProcessor.registerHandlers();
+    }
+
+    private void onCommonSetup(FMLCommonSetupEvent pEvent) {
+        NetworkHandler.registerPackets();
     }
 
     private void onClientSetup(FMLClientSetupEvent pEvent) {

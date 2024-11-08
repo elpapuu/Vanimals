@@ -9,18 +9,25 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 public class EntityUtils {
     public static <T extends Entity> @NotNull List<T> getEntitiesAroundPos(Class<T> pEntityClass, @Nullable Entity pSelf, Vec3 pPos, float pRadius, boolean pMustSee) {
         if (pSelf != null) {
             AABB aabb = pSelf.getBoundingBox().inflate(pRadius);
-            List<T> entityList = pSelf.level().getEntitiesOfClass(pEntityClass, aabb, EntitySelector.ENTITY_STILL_ALIVE);
+            List<T> entityList = new ArrayList<>(pSelf.level().getEntitiesOfClass(pEntityClass, aabb, EntitySelector.ENTITY_STILL_ALIVE));
             if (!entityList.isEmpty()) {
                 if (pSelf instanceof LivingEntity living) {
                     if (pMustSee) {
-                        entityList.removeIf(entity1 -> !living.hasLineOfSight(entity1));
+                        List<T> copyList = new ArrayList<>(entityList);
+                        for (T entity : copyList) {
+                            if (!living.hasLineOfSight(entity)) {
+                                entityList.remove(entity);
+                            }
+                        }
                     }
                     return entityList;
                 }

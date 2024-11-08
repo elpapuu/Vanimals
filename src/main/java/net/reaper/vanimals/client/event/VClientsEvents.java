@@ -1,25 +1,67 @@
 package net.reaper.vanimals.client.event;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.reaper.vanimals.client.ModClientProxy;
+import net.reaper.vanimals.client.input.InputKey;
+import net.reaper.vanimals.client.input.InputStateManager;
+import net.reaper.vanimals.client.input.KeyPressType;
+import net.reaper.vanimals.client.renderer.entity.BisonRenderer;
 import net.reaper.vanimals.client.util.IDynamicCamera;
 import net.reaper.vanimals.client.util.ICustomPlayerRidePos;
+import net.reaper.vanimals.common.entity.ground.BisonEntity;
+import net.reaper.vanimals.common.network.NetworkHandler;
+import net.reaper.vanimals.common.network.packet_builder.CorePacket;
+import net.reaper.vanimals.common.network.packet_builder.DataType;
+import net.reaper.vanimals.common.network.packet_builder.Side;
 import net.reaper.vanimals.common.util.RenderUtil;
 import net.reaper.vanimals.Vanimals;
 
 @Mod.EventBusSubscriber(modid = Vanimals.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
-public class ModEventBusClientEvents {
+public class VClientsEvents {
+    @SubscribeEvent
+    public static void onClientTick(TickEvent.ClientTickEvent pEvent) {
+        Player player = Minecraft.getInstance().player;
+        if (player != null) {
+            if (player.level().isClientSide()) {
+                if (pEvent.phase == TickEvent.Phase.START) {
+                    InputStateManager.getInstance().update();
+                    for (InputKey inputKey : InputKey.values()) {
+                        for (KeyPressType pressType : KeyPressType.values()) {
+                            if (InputStateManager.getInstance().isKeyPress(inputKey, pressType)) {
+                                CorePacket packet = new CorePacket(1, Side.SERVER, new DataType[]{DataType.INTEGER, DataType.INTEGER}, new Object[]{inputKey.ordinal(), pressType.ordinal()});
+                                NetworkHandler.sendMSGToServer(packet);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onKeyInput(InputEvent.Key pEvent) {
+        InputKey inputKey = InputKey.fromKeyCode(pEvent.getKey());
+        if (inputKey != null) {
+            InputStateManager.getInstance().updateKeyState(inputKey, pEvent.getAction() != 0);
+        }
+    }
+
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onComputeCameraAngle(ViewportEvent.ComputeCameraAngles pEvent) {
         Player player = Minecraft.getInstance().player;

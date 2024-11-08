@@ -26,6 +26,6 @@ public class ModEntities {
     }
 
     static {
-        BISON = registerEntity("bison", EntityType.Builder.of(BisonEntity::new, MobCategory.CREATURE).sized(1.7F, 3.6F));
+        BISON = registerEntity("bison", EntityType.Builder.of(BisonEntity::new, MobCategory.CREATURE).sized(1.7F, 2.0F));
     }
 }
