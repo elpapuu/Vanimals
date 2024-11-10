@@ -6,7 +6,7 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.common.data.SoundDefinition;
 import net.minecraftforge.common.data.SoundDefinitionsProvider;
 import net.reaper.vanimals.Vanimals;
-import net.reaper.vanimals.core.init.ModSounds;
+import net.reaper.vanimals.core.init.VSoundEvents;
 
 public class ModSoundProvider extends SoundDefinitionsProvider {
     /**
@@ -21,17 +21,17 @@ public class ModSoundProvider extends SoundDefinitionsProvider {
 
     @Override
     public void registerSounds() {
-       simple(ModSounds.BISON_IDLE.get());
-        simple(ModSounds.BISON_IDLE2.get());
-        simple(ModSounds.BISON_HURT.get());
-        simple(ModSounds.BISON_HURT2.get());
-        simple(ModSounds.BISON_ATTACK.get());
-        simple(ModSounds.BISON_ATTACK_2.get());
-        simple(ModSounds.BISON_ATTACK_3.get());
-        simple(ModSounds.BISON_ROAR.get());
-        simple(ModSounds.BISON_ROAR_2.get());
-        simple(ModSounds.BISON_DEATH.get());
-        simple(ModSounds.BISON_DEATH2.get());
+       simple(VSoundEvents.BISON_IDLE.get());
+        simple(VSoundEvents.BISON_IDLE2.get());
+        simple(VSoundEvents.BISON_HURT.get());
+        simple(VSoundEvents.BISON_HURT2.get());
+        simple(VSoundEvents.BISON_ATTACK.get());
+        simple(VSoundEvents.BISON_ATTACK_2.get());
+        simple(VSoundEvents.BISON_ATTACK_3.get());
+        simple(VSoundEvents.BISON_ROAR.get());
+        simple(VSoundEvents.BISON_ROAR_2.get());
+        simple(VSoundEvents.BISON_DEATH.get());
+        simple(VSoundEvents.BISON_DEATH2.get());
     }
 
     public void simple(SoundEvent event){

@@ -1,7 +1,4 @@
-package net.reaper.vanimals.client.model.entity;// Made with Blockbench 4.10.4
-// Exported for Minecraft version 1.17 or later with Mojang mappings
-// Paste this class into your mod and generate all required imports
-
+package net.reaper.vanimals.client.model.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.HierarchicalModel;
@@ -11,6 +8,7 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
 import net.reaper.vanimals.client.animations.entity.BisonAnimations;
 import net.reaper.vanimals.common.entity.ground.BisonEntity;
+import net.reaper.vanimals.util.EntityUtils;
 import org.jetbrains.annotations.NotNull;
 
 public class BisonModel extends HierarchicalModel<BisonEntity> {
@@ -63,19 +61,18 @@ public class BisonModel extends HierarchicalModel<BisonEntity> {
 
     @Override
     public void setupAnim(@NotNull BisonEntity pEntity, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
-        this.root.getAllParts().forEach(ModelPart::resetPose);
+        this.root().getAllParts().forEach(ModelPart::resetPose);
+        this.animateWalk(BisonAnimations.WALK, pLimbSwing, pLimbSwingAmount, 3.0F, 4.0F);
         this.applyHeadRotation(pNetHeadYaw, pHeadPitch);
-
-        //SPRINT
-        if (pEntity.isSprinting()) {
-            this.animateWalk(BisonAnimations.BISON_SPRINT, pLimbSwing, pLimbSwingAmount, 3f, 4.5f);
+        if (!EntityUtils.isEntityMoving(pEntity, 0.08F)) {
+            this.animate(pEntity.idleAnimationState, BisonAnimations.IDLE, pAgeInTicks);
         }
-
-        //WALK NORMAL
-        this.animateWalk(BisonAnimations.BISON_WALK, pLimbSwing, pLimbSwingAmount, 4f, 5.5f);
-        this.animate(pEntity.idleAnimationState, BisonAnimations.BISON_IDLE, pAgeInTicks);
-        this.animate(pEntity.stunnedAnimationState, BisonAnimations.BISON_STUNNED, pAgeInTicks);
-        this.animate(pEntity.attackAnimationState, BisonAnimations.BISON_ATTACK, pAgeInTicks);
+        if (pEntity.isSprinting()) {
+            this.animateWalk(BisonAnimations.SPRINT, pLimbSwing, pLimbSwingAmount, 1.0F, 1.0F);
+        }
+        this.animate(pEntity.stunnedAnimationState, BisonAnimations.STUNNED, pAgeInTicks);
+        this.animate(pEntity.attackAnimationState, BisonAnimations.ATTACK, pAgeInTicks);
+        this.root.yRot = pNetHeadYaw * (Mth.PI / 360F);
     }
 
     public void setMatrixStack(@NotNull PoseStack pMatrixStack) {

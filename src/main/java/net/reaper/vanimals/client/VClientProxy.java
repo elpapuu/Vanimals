@@ -6,15 +6,15 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.registries.RegistryObject;
 import net.reaper.vanimals.client.renderer.entity.BisonRenderer;
-import net.reaper.vanimals.common.ModCommonProxy;
-import net.reaper.vanimals.core.init.ModEntities;
+import net.reaper.vanimals.common.VCommonProxy;
+import net.reaper.vanimals.core.init.VEntityTypes;
 
-public class ModClientProxy extends ModCommonProxy {
+public class VClientProxy extends VCommonProxy {
     public static float currentRoll = 0.0F;
 
     @Override
     public void clientInitialize() {
-        this.registerEntityRender(ModEntities.BISON, BisonRenderer::new);
+        this.registerEntityRender(VEntityTypes.BISON, BisonRenderer::new);
     }
 
     private <T extends Entity> void registerEntityRender(RegistryObject<EntityType<T>> pEntityType, EntityRendererProvider<T> pRenderer) {

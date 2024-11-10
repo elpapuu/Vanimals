@@ -1,9 +1,12 @@
 package net.reaper.vanimals.util;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -13,8 +16,22 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class EntityUtils {
+    public static boolean checkItemsInHands(@Nullable LivingEntity pEntity, Predicate<Item> pCondition) {
+        if (pEntity == null) {
+            return false;
+        }
+        for (InteractionHand hand : InteractionHand.values()) {
+            ItemStack itemInHand = pEntity.getItemInHand(hand);
+            if (pCondition.test(itemInHand.getItem())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static <T extends Entity> @NotNull List<T> getEntitiesAroundPos(Class<T> pEntityClass, @Nullable Entity pSelf, Vec3 pPos, float pRadius, boolean pMustSee) {
         if (pSelf != null) {
             AABB aabb = pSelf.getBoundingBox().inflate(pRadius);

@@ -6,13 +6,12 @@ import net.minecraft.data.tags.EntityTypeTagsProvider;
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.reaper.vanimals.Vanimals;
-import net.reaper.vanimals.common.entity.ground.BisonEntity;
-import net.reaper.vanimals.core.init.ModTags;
+import net.reaper.vanimals.core.init.VTags;
 
 import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;
 
-import static net.reaper.vanimals.core.init.ModEntities.BISON;
+import static net.reaper.vanimals.core.init.VEntityTypes.BISON;
 
 
 public class ModEntityTagsProvider extends EntityTypeTagsProvider {
@@ -22,7 +21,7 @@ public class ModEntityTagsProvider extends EntityTypeTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider pProvider) {
-        tag(ModTags.Entities.FISH).add(EntityType.SALMON, EntityType.PUFFERFISH, EntityType.COD);
-        tag(ModTags.Entities.ANIMAL).add(BISON.get(), EntityType.AXOLOTL, EntityType.COW, EntityType.BAT, EntityType.BEE);
+        tag(VTags.Entities.FISH).add(EntityType.SALMON, EntityType.PUFFERFISH, EntityType.COD);
+        tag(VTags.Entities.ANIMAL).add(BISON.get(), EntityType.AXOLOTL, EntityType.COW, EntityType.BAT, EntityType.BEE);
     }
 }

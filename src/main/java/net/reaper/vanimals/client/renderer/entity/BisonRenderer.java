@@ -3,7 +3,6 @@ package net.reaper.vanimals.client.renderer.entity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.util.Mth;
@@ -27,11 +26,6 @@ public class BisonRenderer extends MobRenderer<BisonEntity, BisonModel> implemen
     @Override
     public @NotNull ResourceLocation getTextureLocation(BisonEntity pEntity) {
         return new ResourceLocation(Vanimals.MODID, (pEntity.isSaddled()? "textures/entity/bison_saddled.png" : "textures/entity/bison.png"));
-    }
-
-    @Override
-    public void render(@NotNull BisonEntity pEntity, float pEntityYaw, float pPartialTicks, @NotNull PoseStack pMatrixStack, @NotNull MultiBufferSource pBuffer, int pPackedLight) {
-        super.render(pEntity, pEntityYaw, pPartialTicks, pMatrixStack, pBuffer, pPackedLight);
     }
 
     @Override

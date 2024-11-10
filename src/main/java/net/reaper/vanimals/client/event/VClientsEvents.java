@@ -1,8 +1,6 @@
 package net.reaper.vanimals.client.event;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -16,14 +14,12 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.reaper.vanimals.client.ModClientProxy;
+import net.reaper.vanimals.client.VClientProxy;
 import net.reaper.vanimals.client.input.InputKey;
 import net.reaper.vanimals.client.input.InputStateManager;
 import net.reaper.vanimals.client.input.KeyPressType;
-import net.reaper.vanimals.client.renderer.entity.BisonRenderer;
 import net.reaper.vanimals.client.util.IDynamicCamera;
 import net.reaper.vanimals.client.util.ICustomPlayerRidePos;
-import net.reaper.vanimals.common.entity.ground.BisonEntity;
 import net.reaper.vanimals.common.network.NetworkHandler;
 import net.reaper.vanimals.common.network.packet_builder.CorePacket;
 import net.reaper.vanimals.common.network.packet_builder.DataType;
@@ -71,11 +67,11 @@ public class VClientsEvents {
                 if (vehicle instanceof Mob mob) {
                     if (vehicle instanceof IDynamicCamera dynamicCamera) {
                         float targetRoll = Math.max(-dynamicCamera.getMaxCameraTilt(), Math.min(dynamicCamera.getMaxCameraTilt(), (mob.yBodyRot -mob.yBodyRotO) * dynamicCamera.getCameraTiltSpeed()));
-                        ModClientProxy.currentRoll = ModClientProxy.currentRoll + (targetRoll - ModClientProxy.currentRoll) * 0.1F;
-                        pEvent.setRoll(pEvent.getRoll() - ModClientProxy.currentRoll);
+                        VClientProxy.currentRoll = VClientProxy.currentRoll + (targetRoll - VClientProxy.currentRoll) * 0.1F;
+                        pEvent.setRoll(pEvent.getRoll() - VClientProxy.currentRoll);
                     } else {
-                        ModClientProxy.currentRoll = ModClientProxy.currentRoll + (0.0F - ModClientProxy.currentRoll) * 0.1F;
-                        pEvent.setRoll(pEvent.getRoll() - ModClientProxy.currentRoll);
+                        VClientProxy.currentRoll = VClientProxy.currentRoll + (0.0F - VClientProxy.currentRoll) * 0.1F;
+                        pEvent.setRoll(pEvent.getRoll() - VClientProxy.currentRoll);
                     }
                 }
             }

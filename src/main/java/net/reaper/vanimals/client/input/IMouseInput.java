@@ -1,4 +1,4 @@
-package net.reaper.vanimals.common.entity.utils;
+package net.reaper.vanimals.client.input;
 
 public interface IMouseInput {
     void onRightClick();

@@ -7,13 +7,11 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
-import net.minecraftforge.client.model.generators.ModelBuilder;
 import net.minecraftforge.client.model.generators.ModelFile;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.reaper.vanimals.Vanimals;
 import net.reaper.vanimals.common.util.ResourceLocationUtils;
-import net.reaper.vanimals.core.init.ModBlocks;
 
 public class ModBlockStatesProvider extends BlockStateProvider {
     public ModBlockStatesProvider(PackOutput output, ExistingFileHelper exFileHelper) {

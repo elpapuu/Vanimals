@@ -1,5 +1,6 @@
 package net.reaper.vanimals.common.events;
 
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -8,7 +9,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.reaper.vanimals.Vanimals;
 import net.reaper.vanimals.common.entity.ground.BisonEntity;
-import net.reaper.vanimals.core.init.ModEntities;
+import net.reaper.vanimals.core.init.VEntityTypes;
 
 import net.minecraft.world.entity.SpawnPlacements;
 
@@ -16,15 +17,15 @@ import net.minecraft.world.entity.SpawnPlacements;
 public class ModEventBusEvents {
     @SubscribeEvent
     public static void registerAttributes(EntityAttributeCreationEvent event) {
-        event.put(ModEntities.BISON.get(), BisonEntity.createAttributes().build());
+        event.put(VEntityTypes.BISON.get(), BisonEntity.createAttributes().build());
     }
     @SubscribeEvent
     public static void registerSpawnPlacements(SpawnPlacementRegisterEvent event) {
         event.register(
-                ModEntities.BISON.get(),
+                VEntityTypes.BISON.get(),
                 SpawnPlacements.Type.ON_GROUND,
                 Heightmap.Types.WORLD_SURFACE,
-                BisonEntity::canSpawn,
+                Animal::checkAnimalSpawnRules,
                 SpawnPlacementRegisterEvent.Operation.OR
         );
     }

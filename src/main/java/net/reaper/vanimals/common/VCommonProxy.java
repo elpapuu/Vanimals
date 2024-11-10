@@ -1,6 +1,6 @@
 package net.reaper.vanimals.common;
 
-public class ModCommonProxy {
+public class VCommonProxy {
     public void commonInitialize() {
 
     }

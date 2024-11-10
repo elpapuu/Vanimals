@@ -11,7 +11,7 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import net.reaper.vanimals.Vanimals;
-import net.reaper.vanimals.core.init.ModItems;
+import net.reaper.vanimals.core.init.VItems;
 
 public class ModItemModelsProvider extends ItemModelProvider {
 
@@ -22,16 +22,16 @@ public class ModItemModelsProvider extends ItemModelProvider {
 
     @Override
     protected void registerModels() {
-        simple(ModItems.BISON_FUR.get());
-        simple(ModItems.BISON_HORN.get());
+        simple(VItems.BISON_FUR.get());
+        simple(VItems.BISON_HORN.get());
 
-        simple(ModItems.RAW_BISON.get());
+        simple(VItems.RAW_BISON.get());
 
-        simple(ModItems.COOKED_BISON.get());
+        simple(VItems.COOKED_BISON.get());
 
-        spawnEgg(ModItems.BISON_SPAWN_EGG.get());
+        spawnEgg(VItems.BISON_SPAWN_EGG.get());
 
-        handheldRod(ModItems.APPLE_ON_A_STICK);
+        handheldRod(VItems.APPLE_ON_A_STICK);
     }
 
     private ItemModelBuilder handheldItem(RegistryObject<Item>item) {
