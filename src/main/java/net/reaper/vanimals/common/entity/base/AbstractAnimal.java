@@ -25,6 +25,7 @@ import net.reaper.vanimals.client.input.InputKey;
 import net.reaper.vanimals.client.input.InputStateManager;
 import net.reaper.vanimals.client.input.KeyPressType;
 import net.reaper.vanimals.common.entity.ai.behavior.DietBuilder;
+import net.reaper.vanimals.common.entity.ai.control.RealisticMoveControl;
 import net.reaper.vanimals.common.entity.ai.navigation.SmartGroundNavigation;
 import net.reaper.vanimals.common.entity.ground.BisonEntity;
 import net.reaper.vanimals.util.EntityUtils;
@@ -49,6 +50,7 @@ public abstract class AbstractAnimal extends Animal {
         super(pEntityType, pLevel);
         this.diet = this.createDiet();
         this.setAttackStrategy(AttackStrategy.MELEE);
+        this.moveControl = new RealisticMoveControl(this, 1.6F);
         this.navigation = new SmartGroundNavigation(this, this.getNavigationAccuracy());
     }
 
@@ -125,8 +127,7 @@ public abstract class AbstractAnimal extends Animal {
                         } else {
                             this.setSprinting(false);
                         }
-                    }
-                    if (InputStateManager.getInstance().isKeyPress(InputKey.CTRL, KeyPressType.RELEASED)) {
+                    } else {
                         this.setSprinting(false);
                     }
                 }
