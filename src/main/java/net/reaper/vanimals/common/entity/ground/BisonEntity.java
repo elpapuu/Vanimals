@@ -29,12 +29,16 @@ import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.reaper.vanimals.client.input.InputKey;
@@ -518,9 +522,25 @@ public class BisonEntity extends AbstractAnimal implements ItemSteerable, Saddle
     @Override
     public void onServerInput(InputKey pInputKey, KeyPressType pKeyPressType) {
         if (pKeyPressType == KeyPressType.HOLD && pInputKey == InputKey.CTRL) {
-            TickUtils.doEvery(this, 5, () -> {
-                this.attackEntitiesInFront(0.25F, 0.6F, this::knockBack);
-            });
+            this.attackEntitiesInFront(0.25F, 0.6F, this::knockBack);
+            Vec3 headPosition = this.position().add(0, this.getEyeHeight(), 0);
+            Vec3 lookDirection = this.getLookAngle().normalize();
+            Vec3 headWithOffset = headPosition.add(lookDirection.scale(3.5F));
+            float yaw = this.getYRot();
+            float pitch = this.getXRot();
+            Vec3 direction = new Vec3(-Math.sin(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch)), -Math.sin(Math.toRadians(pitch)), Math.cos(Math.toRadians(yaw)) * Math.cos(Math.toRadians(pitch))).normalize();
+            if (pitch > 30.0F) {
+                Vec3 targetPosition = headWithOffset.add(direction.scale(2.8F));
+                BlockHitResult hitResult = this.level().clip(new ClipContext(headWithOffset, targetPosition, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, this));
+                if (hitResult.getType() == HitResult.Type.BLOCK) {
+                    BlockPos targetPos = hitResult.getBlockPos();
+                    BlockState targetBlockState = this.level().getBlockState(targetPos);
+                    if (targetBlockState.is(Blocks.DIRT) || targetBlockState.is(Blocks.GRASS_BLOCK)) {
+                        this.level().playSound(this, targetPos, SoundEvents.HOE_TILL, SoundSource.BLOCKS, 1.0F, 0.7F);
+                        this.level().setBlock(targetPos, Blocks.FARMLAND.defaultBlockState(), Block.UPDATE_ALL);
+                    }
+                }
+            }
         }
     }
 
