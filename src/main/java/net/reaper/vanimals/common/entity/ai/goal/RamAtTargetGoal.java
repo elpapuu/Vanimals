@@ -19,6 +19,7 @@ public class RamAtTargetGoal extends Goal {
     protected float reachDistance = 0.2F;
     protected Vec3 direction;
     private int runTicks;
+    private boolean reached;
 
     public RamAtTargetGoal(AbstractAnimal pAnimal, float pSpeedModifier) {
         this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
@@ -53,6 +54,7 @@ public class RamAtTargetGoal extends Goal {
             this.direction = target.position().subtract(this.animal.position()).normalize();
             this.runTicks = 65;
         }
+        this.reached = false;
     }
 
     @Override
@@ -67,12 +69,11 @@ public class RamAtTargetGoal extends Goal {
         if (target != null) {
             --this.runTicks;
             this.animal.setSprinting(true);
-            this.animal.attackEntitiesInFront(0.35F, 1.3F, entity -> {
-                this.runTicks = 0;
-                if (this.animal instanceof BisonEntity bison) {
-                    bison.knockBack(entity);
-                }
-            });
+            if (!this.animal.level().isClientSide()) {
+                this.animal.attackEntitiesInFront(0.35F, 1.3F, entity -> {
+                    this.runTicks = 0;
+                });
+            }
             if (this.direction != null) {
                 BlockPos nextPos = this.animal.blockPosition().offset((int) Math.round(this.direction.x), 0, (int) Math.round(this.direction.z));
                 if (!this.isSafePath(nextPos)) {

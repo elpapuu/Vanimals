@@ -6,6 +6,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.animal.Animal;
@@ -25,6 +26,7 @@ import net.reaper.vanimals.client.input.InputKey;
 import net.reaper.vanimals.client.input.InputStateManager;
 import net.reaper.vanimals.client.input.KeyPressType;
 import net.reaper.vanimals.common.entity.ai.behavior.DietBuilder;
+import net.reaper.vanimals.common.entity.ai.behavior.EntityCategory;
 import net.reaper.vanimals.common.entity.ai.control.RealisticMoveControl;
 import net.reaper.vanimals.common.entity.ai.navigation.SmartGroundNavigation;
 import net.reaper.vanimals.common.entity.ground.BisonEntity;
@@ -36,22 +38,31 @@ import net.reaper.vanimals.util.compound.EntityData;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jline.utils.Log;
 
 import java.util.List;
 import java.util.function.Consumer;
 
 public abstract class AbstractAnimal extends Animal {
-    public static final EntityData<Integer> ATTACK_STRATEGY = new EntityData<>(BisonEntity.class, "AttackStrategy", CompoundType.INTEGER, 0);
-    public static final EntityData<Integer> RAM_COOLDOWN = new EntityData<>(BisonEntity.class, "RunCooldown", CompoundType.INTEGER, 0);
+    public static final EntityData<Integer> ATTACK_STRATEGY = new EntityData<>(AbstractAnimal.class, "AttackStrategy", CompoundType.INTEGER, 0);;
+    public static final EntityData<Integer> RAM_COOLDOWN = new EntityData<>(AbstractAnimal.class, "RunCooldown", CompoundType.INTEGER, 0);;
     private final DietBuilder diet;
+    public final AnimationState idleAnimationState = new AnimationState();
+    public int idleAnimationTimeout = 0;
+    public EntityCategory category;
 
     public AbstractAnimal(EntityType<? extends Animal> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
+        this.category = this.getCategory();
         this.diet = this.createDiet();
         this.setAttackStrategy(AttackStrategy.MELEE);
-        this.moveControl = new RealisticMoveControl(this, 1.6F);
+        this.moveControl = new RealisticMoveControl(this, this.getBodyRotateSpeed());
         this.navigation = new SmartGroundNavigation(this, this.getNavigationAccuracy());
+    }
+
+    public abstract EntityCategory getCategory();
+
+    protected float getBodyRotateSpeed() {
+        return 2.0F;
     }
 
     protected float getNavigationAccuracy() {
@@ -109,20 +120,22 @@ public abstract class AbstractAnimal extends Animal {
                 if (this.getFirstPassenger() != null) {
                     if (InputStateManager.getInstance().isKeyPress(InputKey.CTRL, KeyPressType.HOLD)) {
                         if (EntityUtils.isEntityMoving(this, 0.08F)) {
-                            BlockPos blockPos = this.getOnPos();
-                            BlockState blockState = this.level().getBlockState(blockPos);
-                            TickUtils.doEvery(this, 4, () -> {
-                                for (float angle : new float[]{-0.3F, 0.3F}) {
-                                    if (!blockState.addRunningEffects(this.level(), blockPos, this) && blockState.getRenderShape() != RenderShape.INVISIBLE) {
-                                        Vec3 delta = this.getDeltaMovement();
-                                        Vec3 lookAngle = this.getLookAngle().normalize();
-                                        Vec3 sideOffset = new Vec3(-lookAngle.z, 0, lookAngle.x + 0.6F).normalize().scale(angle);
-                                        double particleX = this.getX() + sideOffset.x;
-                                        double particleZ = this.getZ() + sideOffset.z;
-                                        this.level().addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, particleX, this.getY() + 0.3F, particleZ, delta.x / 2.5F, 0.01F, delta.z / 2.5F);
+                            if (this.category == EntityCategory.GROUND) {
+                                BlockPos blockPos = this.getOnPos();
+                                BlockState blockState = this.level().getBlockState(blockPos);
+                                TickUtils.doEvery(this, 4, () -> {
+                                    for (float angle : new float[]{-0.3F, 0.3F}) {
+                                        if (!blockState.addRunningEffects(this.level(), blockPos, this) && blockState.getRenderShape() != RenderShape.INVISIBLE) {
+                                            Vec3 delta = this.getDeltaMovement();
+                                            Vec3 lookAngle = this.getLookAngle().normalize();
+                                            Vec3 sideOffset = new Vec3(-lookAngle.z, 0, lookAngle.x + 0.6F).normalize().scale(angle);
+                                            double particleX = this.getX() + sideOffset.x;
+                                            double particleZ = this.getZ() + sideOffset.z;
+                                            this.level().addParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, particleX, this.getY() + 0.3F, particleZ, delta.x / 2.5F, 0.01F, delta.z / 2.5F);
+                                        }
                                     }
-                                }
-                            });
+                                });
+                            }
                             this.setSprinting(true);
                         } else {
                             this.setSprinting(false);
@@ -133,10 +146,53 @@ public abstract class AbstractAnimal extends Animal {
                 }
             }
         } else {
-            if (RAM_COOLDOWN.get(this) > 0) {
-                RAM_COOLDOWN.set(this, RAM_COOLDOWN.get(this) - 1);
+            RAM_COOLDOWN.set(this,  Math.max(RAM_COOLDOWN.get(this) - 1, 0));
+        }
+    }
+
+    public boolean canBreakBlockNearby() {
+        return false;
+    }
+
+    public float getBlockBreakRadius() {
+        return 0.2F;
+    }
+
+    public boolean isValidBlockForBreak(BlockState pBlockState) {
+        return false;
+    }
+
+    @Override
+    public void aiStep() {
+        super.aiStep();
+        if (this.canBreakBlockNearby()) {
+            if (this.isAlive()) {
+                if (this.horizontalCollision && ForgeEventFactory.getMobGriefingEvent(this.level(), this)) {
+                    boolean destroyedBlock = false;
+                    AABB boundingBox = this.getBoundingBox().inflate(this.getBlockBreakRadius());
+                    int minX = Mth.floor(boundingBox.minX);
+                    int minY = Mth.floor(boundingBox.minY);
+                    int minZ = Mth.floor(boundingBox.minZ);
+                    int maxX = Mth.floor(boundingBox.maxX);
+                    int maxY = Mth.floor(boundingBox.maxY);
+                    int maxZ = Mth.floor(boundingBox.maxZ);
+                    for (BlockPos pos : BlockPos.betweenClosed(minX, minY, minZ, maxX, maxY, maxZ)) {
+                        BlockState state = this.level().getBlockState(pos);
+                        if (this.isValidBlockForBreak(state)) {
+                            destroyedBlock = this.level().destroyBlock(pos, true, this) || destroyedBlock;
+                        }
+                    }
+                    if (!destroyedBlock && this.onGround()) {
+                        this.jumpFromGround();
+                    }
+                }
             }
         }
+    }
+
+    @Override
+    public boolean isFood(@NotNull ItemStack pItemStack) {
+        return this.getDiet().isFoodInDiet(pItemStack.getItem());
     }
 
     public void onServerInput(InputKey pInputKey, KeyPressType pKeyPressType) {

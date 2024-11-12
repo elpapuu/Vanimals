@@ -5,15 +5,15 @@ import com.mojang.math.Axis;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.reaper.vanimals.client.model.ModLayers;
+import net.reaper.vanimals.client.model.entity.BisonModel;
 import net.reaper.vanimals.client.renderer.entity.layer.ModPassengerLayer;
 import net.reaper.vanimals.client.util.ICustomPlayerRidePos;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.LivingEntity;
-import net.reaper.vanimals.Vanimals;
-import net.reaper.vanimals.client.model.entity.BisonModel;
+import net.reaper.vanimals.client.util.ResourceUtils;
 import net.reaper.vanimals.common.entity.ground.BisonEntity;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,7 +25,7 @@ public class BisonRenderer extends MobRenderer<BisonEntity, BisonModel> implemen
 
     @Override
     public @NotNull ResourceLocation getTextureLocation(BisonEntity pEntity) {
-        return new ResourceLocation(Vanimals.MODID, (pEntity.isSaddled()? "textures/entity/bison_saddled.png" : "textures/entity/bison.png"));
+        return pEntity.isSaddled() ? ResourceUtils.entity("bison/bison_saddled") : ResourceUtils.entity("bison/bison");
     }
 
     @Override
@@ -42,9 +42,9 @@ public class BisonRenderer extends MobRenderer<BisonEntity, BisonModel> implemen
     }
 
     @Override
-    protected void scale(BisonEntity pLivingEntity, PoseStack pMatrixStack, float pPartialTick) {
-        float size = pLivingEntity.isBaby() ? 0.5F : 1.0F;
+    protected void scale(BisonEntity pEntity, PoseStack pMatrixStack, float pPartialTick) {
+        float size = pEntity.isBaby() ? 0.5F : 1.0F;
         pMatrixStack.scale(size, size, size);
-        super.scale(pLivingEntity, pMatrixStack, pPartialTick);
+        super.scale(pEntity, pMatrixStack, pPartialTick);
     }
 }

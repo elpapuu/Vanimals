@@ -6,11 +6,15 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.util.Mth;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.reaper.vanimals.client.animations.entity.BisonAnimations;
 import net.reaper.vanimals.common.entity.ground.BisonEntity;
+import net.reaper.vanimals.common.entity.ground.TestEntity;
 import net.reaper.vanimals.util.EntityUtils;
 import org.jetbrains.annotations.NotNull;
 
+@OnlyIn(Dist.CLIENT)
 public class BisonModel extends HierarchicalModel<BisonEntity> {
     private final ModelPart root;
     private final ModelPart bison;
@@ -62,16 +66,20 @@ public class BisonModel extends HierarchicalModel<BisonEntity> {
     @Override
     public void setupAnim(@NotNull BisonEntity pEntity, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
         this.root().getAllParts().forEach(ModelPart::resetPose);
-        this.animateWalk(BisonAnimations.WALK, pLimbSwing, pLimbSwingAmount, 3.0F, 4.0F);
         this.applyHeadRotation(pNetHeadYaw, pHeadPitch);
-        if (!EntityUtils.isEntityMoving(pEntity, 0.08F)) {
-            this.animate(pEntity.idleAnimationState, BisonAnimations.IDLE, pAgeInTicks);
+        if (BisonEntity.STUNNED_TICKS.get(pEntity) <= 0) {
+            if (!EntityUtils.isEntityMoving(pEntity, 0.05F)) {
+                this.animate(pEntity.idleAnimationState, BisonAnimations.BISON_IDLE, pAgeInTicks);
+            }
+            this.animate(pEntity.attackAnimationState, BisonAnimations.BISON_ATTACK, pAgeInTicks);
+        } else {
+            this.animate(pEntity.stunnedAnimationState, BisonAnimations.BISON_STUNNED, pAgeInTicks);
         }
         if (pEntity.isSprinting()) {
-            this.animateWalk(BisonAnimations.SPRINT, pLimbSwing, pLimbSwingAmount, 1.0F, 1.0F);
+            this.animateWalk(BisonAnimations.BISON_SPRINT, pLimbSwing, pLimbSwingAmount, 1.0F, 1.0F);
+        } else {
+            this.animateWalk(BisonAnimations.BISON_WALK, pLimbSwing, pLimbSwingAmount, 4.0F, 4.5F);
         }
-        this.animate(pEntity.stunnedAnimationState, BisonAnimations.STUNNED, pAgeInTicks);
-        this.animate(pEntity.attackAnimationState, BisonAnimations.ATTACK, pAgeInTicks);
         this.root.yRot = pNetHeadYaw * (Mth.PI / 360F);
     }
 

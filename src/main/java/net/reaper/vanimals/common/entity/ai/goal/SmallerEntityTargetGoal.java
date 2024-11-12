@@ -1,4 +1,4 @@
-package net.reaper.vanimals.common.entity.goals;
+package net.reaper.vanimals.common.entity.ai.goal;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;

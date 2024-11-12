@@ -26,7 +26,7 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.reaper.vanimals.common.entity.goals.SmallerEntityTargetGoal;
+import net.reaper.vanimals.common.entity.ai.goal.SmallerEntityTargetGoal;
 
 import java.util.EnumSet;
 import javax.annotation.Nonnull;

@@ -32,37 +32,12 @@ public class EntityUtils {
         return false;
     }
 
-    public static <T extends Entity> @NotNull List<T> getEntitiesAroundPos(Class<T> pEntityClass, @Nullable Entity pSelf, Vec3 pPos, float pRadius, boolean pMustSee) {
-        if (pSelf != null) {
-            AABB aabb = pSelf.getBoundingBox().inflate(pRadius);
-            List<T> entityList = new ArrayList<>(pSelf.level().getEntitiesOfClass(pEntityClass, aabb, EntitySelector.ENTITY_STILL_ALIVE));
-            if (!entityList.isEmpty()) {
-                if (pSelf instanceof LivingEntity living) {
-                    if (pMustSee) {
-                        List<T> copyList = new ArrayList<>(entityList);
-                        for (T entity : copyList) {
-                            if (!living.hasLineOfSight(entity)) {
-                                entityList.remove(entity);
-                            }
-                        }
-                    }
-                    return entityList;
-                }
-            }
-        }
-        return Collections.emptyList();
-    }
-
-    public static <T extends Entity> @NotNull List<T> getEntitiesAroundBlock(Class<T> pEntityClass, @Nullable Entity pSelf, Vec3 pPos, float pRadius, boolean pMustSee) {
-        return getEntitiesAroundPos(pEntityClass, pSelf, new BlockPos((int) pPos.x, (int) pPos.y, (int) pPos.z).getCenter(), pRadius, pMustSee);
-    }
-
     public static boolean isEntityStepping(LivingEntity pEntity, float pAnimationSpeedFactor, float pScale) {
         float stepOffset = (float) Math.tan(pEntity.walkAnimation.position() * pAnimationSpeedFactor - 0.2F);
         return stepOffset * stepOffset < pScale * pScale;
     }
 
-    public static boolean isEntityMoving(@javax.annotation.Nullable Entity pEntity, float pMinChange) {
+    public static boolean isEntityMoving(@Nullable Entity pEntity, float pMinChange) {
         if (pEntity == null) {
             return false;
         }

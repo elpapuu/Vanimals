@@ -10,7 +10,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -36,32 +35,39 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.ForgeEventFactory;
 import net.reaper.vanimals.client.input.InputKey;
 import net.reaper.vanimals.client.input.KeyPressType;
 import net.reaper.vanimals.client.util.IDynamicCamera;
 import net.reaper.vanimals.client.util.IShakeScreenOnStep;
 import net.reaper.vanimals.common.entity.ai.behavior.DietBuilder;
+import net.reaper.vanimals.common.entity.ai.behavior.EntityCategory;
+import net.reaper.vanimals.common.entity.ai.control.RealisticMoveControl;
 import net.reaper.vanimals.common.entity.ai.goal.RamAtTargetGoal;
 import net.reaper.vanimals.common.entity.base.AbstractAnimal;
-import net.reaper.vanimals.common.entity.goals.DisablePlayerShieldGoal;
 import net.reaper.vanimals.core.init.VEntityTypes;
 import net.reaper.vanimals.core.init.VItems;
 import net.reaper.vanimals.core.init.VSoundEvents;
 import net.reaper.vanimals.util.EntityUtils;
-import net.reaper.vanimals.util.TickUtils;
+import net.reaper.vanimals.util.compound.CompoundType;
+import net.reaper.vanimals.util.compound.EntityData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jline.utils.Log;
 
 import javax.annotation.Nonnull;
-import java.util.Iterator;
 
 public class BisonEntity extends AbstractAnimal implements ItemSteerable, Saddleable, IDynamicCamera, IShakeScreenOnStep {
+    public static final EntityData<Integer> STUNNED_TICKS = new EntityData<>(BisonEntity.class, "StunnedTicks", CompoundType.INTEGER, 0);
+    private static final EntityDataAccessor<Boolean> DATA_SADDLE_ID;
+    private static final EntityDataAccessor<Integer> DATA_BOOST_TIME;
+    public final AnimationState attackAnimationState = new AnimationState();
+    public final AnimationState stunnedAnimationState = new AnimationState();
+    private int attackAnimationTimeout = 0;
+    private int stunnedAnimationTimeout = 0;
+    private final ItemBasedSteering steering;
+    private int shieldDamageCounter = 0;
 
     public BisonEntity(EntityType<? extends AbstractAnimal> pEntityType, Level pLevel) {
         super(pEntityType, pLevel);
@@ -69,37 +75,24 @@ public class BisonEntity extends AbstractAnimal implements ItemSteerable, Saddle
         this.setMaxUpStep(1.0F);
         this.xpReward = 20;
         this.setPathfindingMalus(BlockPathTypes.LEAVES, 0.0F);
+        this.moveControl = new RealisticMoveControl(this, 2.0F) {
+            @Override
+            public void tick() {
+                if (STUNNED_TICKS.get(BisonEntity.this) <= 0) {
+                    super.tick();
+                }
+            }
+        };
     }
-
-    private static final EntityDataAccessor<Boolean> IS_ATTACKING = SynchedEntityData.defineId(BisonEntity.class, EntityDataSerializers.BOOLEAN);
-    private static final EntityDataAccessor<Boolean> DATA_SADDLE_ID;
-    private static final EntityDataAccessor<Integer> DATA_BOOST_TIME;
-    public final AnimationState idleAnimationState = new AnimationState();
-    public final AnimationState stunnedAnimationState = new AnimationState();
-    public final AnimationState attackAnimationState = new AnimationState();
-    private int idleAnimationTimeout = 0;
-    private int attackAnimationTimeout = 0;
-    private int stunnedAnimationTimeout = 0;
-    private final ItemBasedSteering steering;
-    private int attackTick;
-    private int stunnedTick;
-    private int roarTick;
-    private int shieldDamageCounter = 0;
-
 
     @Override
     public void tick() {
         super.tick();
-        if (this.level().isClientSide()) {
-            this.idleAnimationState.animateWhen(!isInWaterOrBubble() && !this.walkAnimation.isMoving(), this.tickCount);
-            this.stunnedAnimationState.animateWhen((this.stunnedTick > 0) && !this.isUnderWater(), this.tickCount);
-            this.attackAnimationState.animateWhen((this.attackTick > 0) && this.isAttacking(), this.tickCount);
-            this.handleScreenShake();
-        } else {
+        if (!this.level().isClientSide()) {
             LivingEntity target = this.getTarget();
             if (target != null) {
                 if (AbstractAnimal.RAM_COOLDOWN.get(this) <= 0 && this.distanceTo(target) >= 4.5F) {
-                    AbstractAnimal.RAM_COOLDOWN.set(this, 150);
+                    AbstractAnimal.RAM_COOLDOWN.set(this, 200);
                     this.setAttackStrategy(AttackStrategy.RAM);
                 }
             }
@@ -110,43 +103,37 @@ public class BisonEntity extends AbstractAnimal implements ItemSteerable, Saddle
     protected void setupAnimations() {
         //Idle Animation
         if (this.idleAnimationTimeout <= 0) {
-            this.idleAnimationTimeout = this.random.nextInt(40) + 80;
+            this.idleAnimationTimeout = 54;
             this.idleAnimationState.start(this.tickCount);
         } else {
             --this.idleAnimationTimeout;
         }
+
         //Stunned animation
-        if (this.stunnedTick > 0 && !this.isUnderWater()) {
-            if (this.idleAnimationState.isStarted()) {
-                this.idleAnimationState.stop();
-            }
-            if (this.attackAnimationState.isStarted()) {
-                this.attackAnimationState.stop();
-            }
+        if (STUNNED_TICKS.get(this) > 0 &&  this.stunnedAnimationTimeout <= 0 && !this.isUnderWater()) {
             this.stunnedAnimationTimeout = 20;
             this.stunnedAnimationState.start(this.tickCount);
         } else {
             --this.stunnedAnimationTimeout;
         }
-        if (this.stunnedTick <= 0 || this.isUnderWater()) {
+        if (STUNNED_TICKS.get(this) <= 0 || this.isUnderWater()) {
             this.stunnedAnimationState.stop();
         }
+
         //Attack animation
-        if (this.attackTick > 0 && this.isAttacking()) {
-            this.attackAnimationTimeout = 20;
+        if (this.attackAnimationTimeout == 8) {
             this.attackAnimationState.start(this.tickCount);
-        } else {
-            --this.attackAnimationTimeout;
         }
-        if (this.attackTick <= 0 && !this.isAttacking()) {
+        if (this.attackAnimationTimeout > 0) {
+            --this.attackAnimationTimeout;
+        } else {
             this.attackAnimationState.stop();
         }
     }
 
     @Override
     public boolean hurt(DamageSource damageSource, float amount) {
-        if (damageSource.getDirectEntity() instanceof Projectile && damageSource.getEntity() instanceof Player) {
-            Player player = (Player) damageSource.getEntity();
+        if (damageSource.getDirectEntity() instanceof Projectile && damageSource.getEntity() instanceof Player player) {
             ItemStack shield = player.getMainHandItem();
 
             // Check if the target is holding a shield
@@ -184,23 +171,20 @@ public class BisonEntity extends AbstractAnimal implements ItemSteerable, Saddle
         this.goalSelector.addGoal(1, new RamAtTargetGoal(this, 0.3F));
         this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new BreedGoal(this, 1.15D));
-        this.goalSelector.addGoal(1, new PanicGoal(this, 1.5F) {
+        this.goalSelector.addGoal(1, new BreedGoal(this, 0.9F));
+        this.goalSelector.addGoal(1, new PanicGoal(this, 1.1F) {
             @Override
             protected boolean shouldPanic() {
                 return super.shouldPanic() && this.mob.isBaby() && DamageSource.class.desiredAssertionStatus();
             }
         });
-        this.goalSelector.addGoal(1, new DisablePlayerShieldGoal(this));
-        this.goalSelector.addGoal(2, new TemptGoal(this, 1.2D, Ingredient.of(Items.APPLE, Items.WHEAT, VItems.APPLE_ON_A_STICK.get()), false));
-        this.targetSelector.addGoal(2, new HurtByTargetGoal(this));
+        this.goalSelector.addGoal(2, new TemptGoal(this, 0.9F, Ingredient.of(Items.APPLE, Items.WHEAT, VItems.APPLE_ON_A_STICK.get()), false));
         this.targetSelector.addGoal(3, (new HurtByTargetGoal(this)).setAlertOthers());
-        this.goalSelector.addGoal(3, new FollowParentGoal(this, 1.1D));
-        this.goalSelector.addGoal(4, new WaterAvoidingRandomStrollGoal(this, 1.1D));
-        this.goalSelector.addGoal(4, new RandomStrollGoal(this, 1.1D));
-        this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 3f));
+        this.goalSelector.addGoal(3, new FollowParentGoal(this, 0.9F));
+        this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 3.0F));
         this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
         this.targetSelector.addGoal(8, new ResetUniversalAngerTargetGoal(this, true));
+        this.goalSelector.addGoal(4, new RandomStrollGoal(this, 0.9F));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -220,6 +204,11 @@ public class BisonEntity extends AbstractAnimal implements ItemSteerable, Saddle
         return this.isBaby() ? pDimensions.height * 0.95F : 1.3F;
     }
 
+    @Override
+    public EntityCategory getCategory() {
+        return EntityCategory.GROUND;
+    }
+
     @Nullable
     @Override
     public AgeableMob getBreedOffspring(@NotNull ServerLevel pLevel, @NotNull AgeableMob pOtherParent) {
@@ -228,12 +217,7 @@ public class BisonEntity extends AbstractAnimal implements ItemSteerable, Saddle
 
     @Override
     protected DietBuilder createDiet() {
-        return null;
-    }
-
-    @Override
-    public boolean isFood(@NotNull ItemStack pItemStack) {
-        return pItemStack.is(Items.APPLE) || pItemStack.is(Items.WHEAT);
+        return new DietBuilder().addFood(Items.APPLE).addFood(Items.WHEAT);
     }
 
     @Nullable
@@ -242,33 +226,29 @@ public class BisonEntity extends AbstractAnimal implements ItemSteerable, Saddle
         return this.random.nextInt(2) == 0 ? VSoundEvents.BISON_IDLE.get() : VSoundEvents.BISON_IDLE2.get();
     }
 
-    public InteractionResult mobInteract(Player p_28298_, InteractionHand p_28299_) {
-        ItemStack $$2 = p_28298_.getItemInHand(p_28299_);
-        boolean flag = this.isFood(p_28298_.getItemInHand(p_28299_));
-        if ($$2.is(Items.BUCKET) && !this.isBaby()) {
-            p_28298_.playSound(SoundEvents.COW_MILK, 1.0F, 1.0F);
-            ItemStack $$3 = ItemUtils.createFilledResult($$2, p_28298_, Items.MILK_BUCKET.getDefaultInstance());
-            p_28298_.setItemInHand(p_28299_, $$3);
+    @Override
+    public @NotNull InteractionResult mobInteract(@NotNull Player pPlayer, @NotNull InteractionHand pHand) {
+        ItemStack itemInHand = pPlayer.getItemInHand(pHand);
+        if (itemInHand.is(Items.BUCKET) && !this.isBaby()) {
+            pPlayer.playSound(SoundEvents.COW_MILK, 1.0F, 1.0F);
+            pPlayer.setItemInHand(pHand, ItemUtils.createFilledResult(itemInHand, pPlayer, Items.MILK_BUCKET.getDefaultInstance()));
             return InteractionResult.sidedSuccess(this.level().isClientSide);
         }
-        if (!flag && this.isSaddled() && !this.isVehicle() && !p_28298_.isSecondaryUseActive()) {
+        if (!this.isFood(itemInHand) && this.isSaddled() && !this.isVehicle() && !pPlayer.isSecondaryUseActive()) {
             if (!this.level().isClientSide) {
-                p_28298_.startRiding(this);
+                this.startRiding(pPlayer);
             }
             return InteractionResult.sidedSuccess(this.level().isClientSide);
-        } else {
-            InteractionResult interactionresult = super.mobInteract(p_28298_, p_28299_);
-            if (!interactionresult.consumesAction()) {
-                ItemStack itemstack = p_28298_.getItemInHand(p_28299_);
-                return itemstack.is(Items.SADDLE) ? itemstack.interactLivingEntity(p_28298_, this, p_28299_) : InteractionResult.PASS;
-            } else {
-                return interactionresult;
-            }
         }
-
+        InteractionResult result = super.mobInteract(pPlayer, pHand);
+        if (!result.consumesAction() && itemInHand.is(Items.SADDLE)) {
+            return itemInHand.interactLivingEntity(pPlayer, this, pHand);
+        }
+        return result.consumesAction() ? result : InteractionResult.PASS;
     }
 
     @Nullable
+    @Override
     public LivingEntity getControllingPassenger() {
         if (this.isSaddled()) {
             Entity entity = this.getFirstPassenger();
@@ -281,40 +261,41 @@ public class BisonEntity extends AbstractAnimal implements ItemSteerable, Saddle
         return null;
     }
 
-    public void onSyncedDataUpdated(EntityDataAccessor<?> p_29480_) {
-        if (DATA_SADDLE_ID.equals(p_29480_) && this.level().isClientSide) {
+    @Override
+    public void onSyncedDataUpdated(@NotNull EntityDataAccessor<?> pDataAccessor) {
+        if (DATA_SADDLE_ID.equals(pDataAccessor) && this.level().isClientSide) {
             this.steering.onSynced();
         }
-
-        super.onSyncedDataUpdated(p_29480_);
+        super.onSyncedDataUpdated(pDataAccessor);
     }
 
-    protected float getRiddenSpeed(Player p_278258_) {
-        return (float) (this.getAttributeValue(Attributes.MOVEMENT_SPEED) * 1 * (double) this.steering.boostFactor());
+    @Override
+    protected float getRiddenSpeed(@NotNull Player pPlayer) {
+        return (float) this.getAttributeValue(Attributes.MOVEMENT_SPEED);
     }
 
+    @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         this.entityData.define(DATA_SADDLE_ID, false);
-        this.getEntityData().define(IS_ATTACKING, false);
         this.entityData.define(DATA_BOOST_TIME, 0);
+        STUNNED_TICKS.define(this);
     }
 
-    public void addAdditionalSaveData(@NotNull CompoundTag p_29495_) {
-        super.addAdditionalSaveData(p_29495_);
-        this.steering.addAdditionalSaveData(p_29495_);
-        p_29495_.putInt("AttackTick", this.attackTick);
-        p_29495_.putInt("StunTick", this.stunnedTick);
-        p_29495_.putInt("RoarTick", this.roarTick);
+    @Override
+    public void addAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.addAdditionalSaveData(pCompound);
+        this.steering.addAdditionalSaveData(pCompound);
+        STUNNED_TICKS.write(this, pCompound);
     }
 
-    public void readAdditionalSaveData(@NotNull CompoundTag p_29478_) {
-        super.readAdditionalSaveData(p_29478_);
-        this.steering.readAdditionalSaveData(p_29478_);
-        this.attackTick = p_29478_.getInt("AttackTick");
-        this.stunnedTick = p_29478_.getInt("StunTick");
-        this.roarTick = p_29478_.getInt("RoarTick");
+    @Override
+    public void readAdditionalSaveData(@NotNull CompoundTag pCompound) {
+        super.readAdditionalSaveData(pCompound);
+        this.steering.readAdditionalSaveData(pCompound);
+        STUNNED_TICKS.read(this, pCompound);
     }
+
 
     @Override
     public boolean isSaddleable() {
@@ -345,7 +326,7 @@ public class BisonEntity extends AbstractAnimal implements ItemSteerable, Saddle
 
     @Override
     protected float[] getInputSpeed(@NotNull Player pPlayer) {
-        return new float[]{0.0F, 0.0F, this.isSprinting() ? 0.8F : 0.4F};
+        return new float[]{0.0F, 0.0F, this.isSprinting() ? 0.8F : 0.3F};
     }
 
     @Override
@@ -366,6 +347,13 @@ public class BisonEntity extends AbstractAnimal implements ItemSteerable, Saddle
     }
 
     @Override
+    protected void updateWalkAnimation(float pPartialTick) {
+        float speed = this.getControllingPassenger() != null ? 2.2F : (!this.isBaby() ? 8.5F : 4.5F);
+        float f = this.getPose() == Pose.STANDING ? Math.min(pPartialTick * speed, 1.0F) : 0.0F;
+        this.walkAnimation.update(f, 0.2F);
+    }
+
+    @Override
     public boolean boost() {
         return true;
     }
@@ -379,133 +367,104 @@ public class BisonEntity extends AbstractAnimal implements ItemSteerable, Saddle
     public void handleEntityEvent(byte pId) {
         switch (pId) {
             case 4:
-                this.attackTick = 10;
+                if (this.attackAnimationTimeout <= 0) {
+                    this.attackAnimationTimeout = 8;
+                }
                 this.playSound(VSoundEvents.BISON_ATTACK.get(), 1.0F, 1.0F);
                 break;
             case 39:
-                this.stunnedTick = 40;
+                STUNNED_TICKS.set(this, 50);
                 break;
             default:
                 super.handleEntityEvent(pId);
         }
     }
 
+    @Override
+    public boolean canBreakBlockNearby() {
+        return true;
+    }
+
+    @Override
+    public boolean isValidBlockForBreak(BlockState pBlockState) {
+        return pBlockState.getBlock() instanceof LeavesBlock;
+    }
+
+    @Override
     public void aiStep() {
         super.aiStep();
-
         if (this.isAlive()) {
-
-            if (this.horizontalCollision && ForgeEventFactory.getMobGriefingEvent(this.level(), this)) {
-                boolean flag = false;
-                AABB aabb = this.getBoundingBox().inflate(0.2);
-                Iterator var8 = BlockPos.betweenClosed(Mth.floor(aabb.minX), Mth.floor(aabb.minY), Mth.floor(aabb.minZ), Mth.floor(aabb.maxX), Mth.floor(aabb.maxY), Mth.floor(aabb.maxZ)).iterator();
-
-                label62:
-                while (true) {
-                    BlockPos blockpos;
-                    Block block;
-                    do {
-                        if (!var8.hasNext()) {
-                            if (!flag && this.onGround()) {
-                                this.jumpFromGround();
-                            }
-                            break label62;
-                        }
-
-                        blockpos = (BlockPos) var8.next();
-                        BlockState blockstate = this.level().getBlockState(blockpos);
-                        block = blockstate.getBlock();
-                    } while (!(block instanceof LeavesBlock));
-
-                    flag = this.level().destroyBlock(blockpos, true, this) || flag;
-                }
-            }
-            if (this.attackTick > 0) {
-                --this.attackTick;
-            }
-
-            if (this.stunnedTick > 0) {
-                --this.stunnedTick;
+            if (STUNNED_TICKS.get(this) > 0) {
+                STUNNED_TICKS.set(this, STUNNED_TICKS.get(this) - 1);
                 this.stunEffect();
-                if (this.stunnedTick == 0) {
+                if (STUNNED_TICKS.get(this) == 1) {
                     this.playSound(VSoundEvents.BISON_ROAR.get(), 1.0F, 1.0F);
                 }
             }
         }
-
-
-        super.aiStep();
     }
 
     private float getAttackDamage() {
         return (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE);
     }
 
+    @Override
     protected boolean isImmobile() {
-        return super.isImmobile() || this.attackTick > 0 || this.stunnedTick > 0 || this.roarTick > 0;
+        return super.isImmobile() || STUNNED_TICKS.get(this) > 0;
     }
 
-    public boolean hasLineOfSight(Entity p_149755_) {
-        return this.stunnedTick <= 0 && this.roarTick <= 0 ? super.hasLineOfSight(p_149755_) : false;
+    @Override
+    public boolean hasLineOfSight(@NotNull Entity pEntity) {
+        return STUNNED_TICKS.get(this) <= 0 && super.hasLineOfSight(pEntity);
     }
 
-    public boolean isAttacking() {
-        return this.getEntityData().get(IS_ATTACKING);
-    }
-
-    public void setAttacking(boolean isAttacking) {
-        this.entityData.set(IS_ATTACKING, isAttacking);
-    }
-
+    @Override
     public boolean doHurtTarget(@NotNull Entity pTarget) {
-        this.attackTick = 10;
         this.level().broadcastEntityEvent(this, (byte) 4);
-        float $$1 = this.getAttackDamage();
-        float $$2 = (int) $$1 > 0 ? $$1 / 2.0F + (float) this.random.nextInt((int) $$1) : $$1;
-        boolean $$3 = pTarget.hurt(this.damageSources().mobAttack(this), $$2);
-        if ($$3) {
-            double var10000;
-            if (pTarget instanceof LivingEntity) {
-                LivingEntity $$4 = (LivingEntity) pTarget;
-                var10000 = $$4.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
-            } else {
-                var10000 = 0.0;
+        float attackDamage = this.getAttackDamage();
+        float damage;
+        if (attackDamage > 0) {
+            damage = attackDamage / 2.0F + this.random.nextInt((int) attackDamage);
+        } else {
+            damage = attackDamage;
+        }
+        boolean hurt = pTarget.hurt(this.damageSources().mobAttack(this), damage);
+        if (hurt) {
+            double knockbackResistance = 0.0;
+            if (pTarget instanceof LivingEntity living) {
+                knockbackResistance = living.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
             }
-
-            double $$5 = var10000;
-            double $$6 = Math.max(0.0, 1.0 - $$5);
-            pTarget.setDeltaMovement(pTarget.getDeltaMovement().add(0.0, 0.4000000059604645 * $$6, 0.0));
+            double knockbackFactor = Math.max(0.0, 1.0 - knockbackResistance);
+            pTarget.setDeltaMovement(pTarget.getDeltaMovement().add(0.0, 0.1 * knockbackFactor, 0.0));
             this.doEnchantDamageEffects(this, pTarget);
+        }
+        if (this.getAttackStrategy() == AttackStrategy.RAM) {
+            this.knockBack(pTarget);
         }
         if (this.getRandom().nextFloat() < 0.5F) {
             this.cooldownShield(pTarget, 60);
         }
         this.playSound(VSoundEvents.BISON_ATTACK_2.get(), 1.0F, 1.0F);
-        return $$3;
+        return hurt;
     }
 
     private void stunEffect() {
         if (this.random.nextInt(6) == 0) {
-            double d0 = this.getX() - (double) this.getBbWidth() * Math.sin((double) (this.yBodyRot * 0.017453292F)) + (this.random.nextDouble() * 0.6 - 0.3);
+            double d0 = this.getX() - (double) this.getBbWidth() * Math.sin(this.yBodyRot * 0.017453292F) + (this.random.nextDouble() * 0.6 - 0.3);
             double d1 = this.getY() + (double) this.getBbHeight() - 0.3;
-            double d2 = this.getZ() + (double) this.getBbWidth() * Math.cos((double) (this.yBodyRot * 0.017453292F)) + (this.random.nextDouble() * 0.6 - 0.3);
+            double d2 = this.getZ() + (double) this.getBbWidth() * Math.cos(this.yBodyRot * 0.017453292F) + (this.random.nextDouble() * 0.6 - 0.3);
             this.level().addParticle(ParticleTypes.ANGRY_VILLAGER, d0, d1, d2, 0.4980392156862745, 0.5137254901960784, 0.5725490196078431);
         }
-
     }
 
     @Override
     protected void blockedByShield(@NotNull LivingEntity pEntity) {
-        if (this.roarTick == 0) {
-            if (this.random.nextDouble() < 0.5) {
-                this.stunnedTick = 50;
-                this.playSound(VSoundEvents.BISON_ATTACK_2.get(), 1.0F, 1.0F);
-                this.level().broadcastEntityEvent(this, (byte) 39);
-                pEntity.push(this);
-            }
-            pEntity.hurtMarked = true;
+        if (this.random.nextDouble() < 0.5) {
+            this.playSound(VSoundEvents.BISON_ATTACK_2.get(), 1.0F, 1.0F);
+            this.level().broadcastEntityEvent(this, (byte) 39);
+            pEntity.push(this);
         }
-
+        pEntity.hurtMarked = true;
     }
 
     public void knockBack(@Nullable Entity pEntity) {
@@ -515,8 +474,8 @@ public class BisonEntity extends AbstractAnimal implements ItemSteerable, Saddle
         double yRot = Math.toRadians(this.getYRot());
         double dirX = -Math.sin(yRot);
         double dirZ = Math.cos(yRot);
-        Vec3 vec3 = new Vec3(dirX, 0.0F, dirZ).normalize().scale(1.9F);
-        pEntity.setDeltaMovement(vec3.x, 1.0F, vec3.z);
+        Vec3 vec3 = new Vec3(dirX, 0.0F, dirZ).normalize().scale(2.1F);
+        pEntity.setDeltaMovement(vec3.x, 0.9F, vec3.z);
     }
 
     @Override
@@ -545,18 +504,6 @@ public class BisonEntity extends AbstractAnimal implements ItemSteerable, Saddle
     }
 
     @Override
-    protected void updateWalkAnimation(float pPartialTick) {
-        float f;
-        if (this.getPose() == Pose.STANDING) {
-            f = Math.min(pPartialTick * 2.0F, 1.0F);
-        } else {
-            f = 0f;
-        }
-        this.walkAnimation.update(f, 0.5F);
-    }
-
-
-    @Override
     public float getMaxCameraTilt() {
         return 10.0F;
     }
@@ -568,22 +515,23 @@ public class BisonEntity extends AbstractAnimal implements ItemSteerable, Saddle
 
     @Override
     public boolean canEntityShake(@NotNull LivingEntity pEntity) {
-        return IShakeScreenOnStep.super.canEntityShake(pEntity) && EntityUtils.isEntityMoving(this, 0.08F);
+        boolean stepping = EntityUtils.isEntityStepping(this, this.getShakeFrequency(), !this.isSprinting() ? 0.2F : 0.3F);
+        return IShakeScreenOnStep.super.canEntityShake(pEntity) && EntityUtils.isEntityMoving(this, 0.08F) && stepping;
     }
 
     @Override
     public float getShakePower() {
-        return 0.2F;
+        return !this.isSprinting() ? 0.07F : 0.16F;
     }
 
     @Override
     public float getShakeFrequency() {
-        return 1.0F;
+        return !this.isSprinting() ? 0.6F : 1.3F;
     }
 
     @Override
     public float getShakeDistance() {
-        return 5.0F;
+        return !this.isSprinting() ? 10.0F : 15.0F;
     }
 
     static {

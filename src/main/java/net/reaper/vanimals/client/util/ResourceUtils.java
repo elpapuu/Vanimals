@@ -12,7 +12,7 @@ public class ResourceUtils {
         return modLoc("textures/" + pPath + ".png");
     }
 
-    public static ResourceLocation entityTexture(String pPath){
-        return modLoc("textures/entity/" + pPath);
+    public static ResourceLocation entity(String pPath){
+        return png("entity/" + pPath);
     }
 }

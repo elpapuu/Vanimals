@@ -17,30 +17,29 @@ public class ModEnglishLanguageProvider extends LanguageProvider {
     
     @Override
     protected void addTranslations() {
-        auto(VItems.BISON_FUR.get());
-        auto(VItems.BISON_HORN.get());
-
-        auto(VItems.RAW_BISON.get());
-        auto(VItems.COOKED_BISON.get());
-
-        auto(VItems.BISON_SPAWN_EGG.get());
-        auto(VItems.APPLE_ON_A_STICK.get());
+        this.auto(VItems.BISON_FUR.get());
+        this.auto(VItems.BISON_HORN.get());
+        this.auto(VItems.RAW_BISON.get());
+        this.auto(VItems.COOKED_BISON.get());
+        this.auto(VItems.BISON_SPAWN_EGG.get());
+        this.auto(VItems.NAPOLEON_FISH_SPAWN_EGG.get());
+        this.auto(VItems.APPLE_ON_A_STICK.get());
 
         //subtitles
-        add(VSoundEvents.BISON_IDLE.get(), "Bison ambient");
-        add(VSoundEvents.BISON_IDLE2.get(), "Bison ambient");
-        add(VSoundEvents.BISON_HURT.get(), "Bison hurt");
-        add(VSoundEvents.BISON_HURT2.get(), "Bison hurt");
-        add(VSoundEvents.BISON_ATTACK.get(), "Bison attack");
-        add(VSoundEvents.BISON_ATTACK_2.get(), "Bison attack");
-        add(VSoundEvents.BISON_ATTACK_3.get(), "Bison attack");
-        add(VSoundEvents.BISON_ROAR.get(), "Bison roar");
-        add(VSoundEvents.BISON_ROAR_2.get(), "Bison roar");
-        add(VSoundEvents.BISON_DEATH.get(), "Bison dying");
-        add(VSoundEvents.BISON_DEATH2.get(), "Bison dying");
+        this.add(VSoundEvents.BISON_IDLE.get(), "Bison ambient");
+        this.add(VSoundEvents.BISON_IDLE2.get(), "Bison ambient");
+        this.add(VSoundEvents.BISON_HURT.get(), "Bison hurt");
+        this.add(VSoundEvents.BISON_HURT2.get(), "Bison hurt");
+        this.add(VSoundEvents.BISON_ATTACK.get(), "Bison attack");
+        this.add(VSoundEvents.BISON_ATTACK_2.get(), "Bison attack");
+        this.add(VSoundEvents.BISON_ATTACK_3.get(), "Bison attack");
+        this.add(VSoundEvents.BISON_ROAR.get(), "Bison roar");
+        this.add(VSoundEvents.BISON_ROAR_2.get(), "Bison roar");
+        this.add(VSoundEvents.BISON_DEATH.get(), "Bison dying");
+        this.add(VSoundEvents.BISON_DEATH2.get(), "Bison dying");
 
         //creative tab
-        addTab("Vanimals", "Vanimals");
+        this.addTab("Vanimals", "Vanimals");
     }
     public void add(SoundEvent soundEvent, String translation){
         add(ModSoundProvider.createSubtitle(soundEvent), translation);

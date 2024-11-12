@@ -20,12 +20,15 @@ import net.reaper.vanimals.client.input.InputStateManager;
 import net.reaper.vanimals.client.input.KeyPressType;
 import net.reaper.vanimals.client.util.IDynamicCamera;
 import net.reaper.vanimals.client.util.ICustomPlayerRidePos;
+import net.reaper.vanimals.client.util.IShakeScreenOnStep;
+import net.reaper.vanimals.client.util.PlayerScreenShaker;
 import net.reaper.vanimals.common.network.NetworkHandler;
 import net.reaper.vanimals.common.network.packet_builder.CorePacket;
 import net.reaper.vanimals.common.network.packet_builder.DataType;
 import net.reaper.vanimals.common.network.packet_builder.Side;
 import net.reaper.vanimals.common.util.RenderUtil;
 import net.reaper.vanimals.Vanimals;
+import net.reaper.vanimals.util.EntityUtils;
 
 @Mod.EventBusSubscriber(modid = Vanimals.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.CLIENT)
 public class VClientsEvents {
@@ -34,6 +37,20 @@ public class VClientsEvents {
         Player player = Minecraft.getInstance().player;
         if (player != null) {
             if (player.level().isClientSide()) {
+                if (pEvent.phase == TickEvent.Phase.END) {
+                    player.level().getEntities(player, player.getBoundingBox().inflate(15.0F), entity -> {
+                        return entity instanceof IShakeScreenOnStep && entity.isAlive();
+                    }).forEach(entity -> {
+                        if (entity instanceof IShakeScreenOnStep screenShaker) {
+                            if (screenShaker.canEntityShake((LivingEntity) entity)) {
+                                float shakePower = screenShaker.getShakePower() * (1.0F - (player.distanceTo(entity) / screenShaker.getShakeDistance()));
+                                if (shakePower > 0.0F) {
+                                    PlayerScreenShaker.startShake(15, shakePower);
+                                }
+                            }
+                        }
+                    });
+                }
                 if (pEvent.phase == TickEvent.Phase.START) {
                     InputStateManager.getInstance().update();
                     for (InputKey inputKey : InputKey.values()) {

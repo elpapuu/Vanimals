@@ -12,37 +12,37 @@ public class ModSoundProvider extends SoundDefinitionsProvider {
     /**
      * Creates a new instance of this data provider.
      *
-     * @param output The {@linkplain PackOutput} instance provided by the data generator.
-     * @param helper The existing file helper provided by the event you are initializing this provider in.
+     * @param pOutput The {@linkplain PackOutput} instance provided by the data generator.
+     * @param pHelper The existing file helper provided by the event you are initializing this provider in.
      */
-    public ModSoundProvider(PackOutput output, ExistingFileHelper helper) {
-        super(output, Vanimals.MODID, helper);
+    public ModSoundProvider(PackOutput pOutput, ExistingFileHelper pHelper) {
+        super(pOutput, Vanimals.MODID, pHelper);
     }
 
     @Override
     public void registerSounds() {
-       simple(VSoundEvents.BISON_IDLE.get());
-        simple(VSoundEvents.BISON_IDLE2.get());
-        simple(VSoundEvents.BISON_HURT.get());
-        simple(VSoundEvents.BISON_HURT2.get());
-        simple(VSoundEvents.BISON_ATTACK.get());
-        simple(VSoundEvents.BISON_ATTACK_2.get());
-        simple(VSoundEvents.BISON_ATTACK_3.get());
-        simple(VSoundEvents.BISON_ROAR.get());
-        simple(VSoundEvents.BISON_ROAR_2.get());
-        simple(VSoundEvents.BISON_DEATH.get());
-        simple(VSoundEvents.BISON_DEATH2.get());
+        this.simple(VSoundEvents.BISON_IDLE.get());
+        this.simple(VSoundEvents.BISON_IDLE2.get());
+        this.simple(VSoundEvents.BISON_HURT.get());
+        this.simple(VSoundEvents.BISON_HURT2.get());
+        this.simple(VSoundEvents.BISON_ATTACK.get());
+        this.simple(VSoundEvents.BISON_ATTACK_2.get());
+        this.simple(VSoundEvents.BISON_ATTACK_3.get());
+        this.simple(VSoundEvents.BISON_ROAR.get());
+        this.simple(VSoundEvents.BISON_ROAR_2.get());
+        this.simple(VSoundEvents.BISON_DEATH.get());
+        this.simple(VSoundEvents.BISON_DEATH2.get());
     }
 
-    public void simple(SoundEvent event){
-        add(event, simpleDefinition(event));
+    public void simple(SoundEvent pSoundEvent){
+        this.add(pSoundEvent, this.simpleDefinition(pSoundEvent));
     }
 
-    protected SoundDefinition simpleDefinition(SoundEvent event){
-        return SoundDefinition.definition().with(SoundDefinition.Sound.sound(event.getLocation(), SoundDefinition.SoundType.SOUND).stream()).subtitle(createSubtitle(event));
+    protected SoundDefinition simpleDefinition(SoundEvent pSoundEvent){
+        return SoundDefinition.definition().with(SoundDefinition.Sound.sound(pSoundEvent.getLocation(), SoundDefinition.SoundType.SOUND).stream()).subtitle(createSubtitle(pSoundEvent));
     }
 
-    public static String createSubtitle(SoundEvent event){
-        return "sound." + event.getLocation().getNamespace() + "." + event.getLocation().getPath();
+    public static String createSubtitle(SoundEvent pSoundEvent){
+        return "sound." + pSoundEvent.getLocation().getNamespace() + "." + pSoundEvent.getLocation().getPath();
     }
 }

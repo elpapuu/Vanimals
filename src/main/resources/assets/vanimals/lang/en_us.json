@@ -3,10 +3,12 @@
 
   "item.vanimals.raw_bison": "Raw Bison",
   "item.vanimals.cooked_bison": "Cooked Bison",
-  "item.vanimals.bison_spawn_egg": "Bison Spawn egg",
+  "item.vanimals.bison_spawn_egg": "Bison Spawn Egg",
+  "item.vanimals.napoleon_fish_spawn_egg": "Napoleon Fish Spawn Egg",
   "item.vanimals.apple_on_a_stick": "Apple on a stick",
 
   "entity.vanimals.bison": "Bison",
+  "entity.vanimals.napoleon_fish": "Napoleon Fish",
   "enityt.vanimals.shieldosteus": "Shieldosteus",
 
   "creativetab.vanimals.Vanimals": "Vanimals"

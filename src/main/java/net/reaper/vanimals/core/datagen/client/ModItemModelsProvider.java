@@ -14,24 +14,23 @@ import net.reaper.vanimals.Vanimals;
 import net.reaper.vanimals.core.init.VItems;
 
 public class ModItemModelsProvider extends ItemModelProvider {
-
     protected ModelFile.ExistingModelFile generated = getExistingFile(mcLoc("item/generated"));
+
     public ModItemModelsProvider(PackOutput output, ExistingFileHelper existingFileHelper) {
         super(output, Vanimals.MODID, existingFileHelper);
     }
 
     @Override
     protected void registerModels() {
-        simple(VItems.BISON_FUR.get());
-        simple(VItems.BISON_HORN.get());
+        this.simple(VItems.BISON_FUR.get());
+        this.simple(VItems.BISON_HORN.get());
+        this.simple(VItems.RAW_BISON.get());
+        this.simple(VItems.COOKED_BISON.get());
 
-        simple(VItems.RAW_BISON.get());
+        this.spawnEgg(VItems.BISON_SPAWN_EGG.get());
+        this.spawnEgg(VItems.NAPOLEON_FISH_SPAWN_EGG.get());
 
-        simple(VItems.COOKED_BISON.get());
-
-        spawnEgg(VItems.BISON_SPAWN_EGG.get());
-
-        handheldRod(VItems.APPLE_ON_A_STICK);
+        this.handheldRod(VItems.APPLE_ON_A_STICK);
     }
 
     private ItemModelBuilder handheldItem(RegistryObject<Item>item) {
@@ -45,16 +44,16 @@ public class ModItemModelsProvider extends ItemModelProvider {
                 new ResourceLocation(Vanimals.MODID,"item/" + item.getId().getPath()));
     }
 
-    protected void simple(ItemLike... items){
-        for (ItemLike item : items) {
+    protected void simple(ItemLike... pItems){
+        for (ItemLike item : pItems) {
             this.basicItem(item.asItem());
         }
     }
 
-    protected void spawnEgg(ItemLike... items){
-        for (ItemLike item : items){
+    protected void spawnEgg(ItemLike... pItems){
+        for (ItemLike item : pItems){
             ResourceLocation id = ForgeRegistries.ITEMS.getKey(item.asItem());
-            getBuilder(id.toString()).parent(getExistingFile(mcLoc("item/template_spawn_egg")));
+            this.getBuilder(id.toString()).parent(this.getExistingFile(this.mcLoc("item/template_spawn_egg")));
         }
     }
 }
