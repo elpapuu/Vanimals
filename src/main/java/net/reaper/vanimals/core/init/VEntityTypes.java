@@ -19,7 +19,7 @@ public class VEntityTypes {
 
     static {
         BISON = registerEntity("bison", EntityType.Builder.of(BisonEntity::new, MobCategory.CREATURE).sized(1.7F, 2.0F));
-        NAPOLEON_FISH = registerEntity("napoleon_fish", EntityType.Builder.of(NapoleonFishEntity::new, MobCategory.WATER_AMBIENT).sized(1.2F, 0.5F));
+        NAPOLEON_FISH = registerEntity("napoleon_fish", EntityType.Builder.of(NapoleonFishEntity::new, MobCategory.WATER_AMBIENT).sized(1.0F, 0.8F));
     }
 
     private static <T extends Entity> RegistryObject<EntityType<T>> registerEntity(String pName, EntityType.Builder<T> pEntityBuilder) {
